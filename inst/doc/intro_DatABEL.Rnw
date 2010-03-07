@@ -1,0 +1,69 @@
+%\VignetteIndexEntry{Introduction to DatABEL}
+\documentclass{article}
+
+\usepackage{hyperref}
+
+\hypersetup{colorlinks,%
+            citecolor=black,%
+            linkcolor=blue,%
+            urlcolor=blue,%
+            }
+
+\newcommand{\DA}{\texttt{DatABEL} }
+
+\title{Intro to \DA}
+\author{Yurii S. Aulchenko}
+%\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+<<>>=
+library(DatABEL)
+
+make_random_matrix <- function(range_dim1 = c(2,10), range_dim2 = c(2,10), range_data = c(-10,10), type="double")
+{
+    dim1 <- round(runif(1,range_dim1[1],range_dim1[2]))
+    dim2 <- round(runif(1,range_dim2[1],range_dim2[2]))
+    data <- runif(dim1*dim2,range_data[1],range_data[2])
+    data <- as(data,type)
+    data <- matrix(data,nrow=dim1,ncol=dim2)
+    namesCol <- paste("col",c(1:dim2),sep="_")
+    namesRow <- paste("row",c(1:dim1),sep="_")
+    dimnames(data) <- list(namesRow,namesCol)
+    return(data)
+}
+
+testmatr <- make_random_matrix()
+testmatr
+test_fv <- as(testmatr,"databel_base_R")
+test_fv
+as(test_fv,"matrix")
+abs(testmatr-as(test_fv,"matrix"))<1e-6
+
+write.table(testmatr,file="test_matrix_dimnames.dat",row.names=TRUE,col.names=TRUE,quote=FALSE)
+
+text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames",R_matrix=TRUE) 
+x <- databel_filtered_R("test_matrix_dimnames")
+x
+tmp <- as(x,"matrix")
+tmp
+abs(testmatr-tmp)<1e-6
+
+text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames_T",
+		R_matrix=TRUE,transpose=TRUE) 
+x <- databel_filtered_R("test_matrix_dimnames_T")
+t(testmatr)
+x
+tmp <- as(x,"matrix")
+tmp
+abs(t(testmatr)-tmp)<1e-6
+
+unlink("*.fv?")
+unlink("test_matrix_*")
+
+@
+
+\end{document}

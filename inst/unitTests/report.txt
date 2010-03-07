@@ -1,0 +1,37 @@
+RUNIT TEST PROTOCOL -- Sun Mar  7 14:05:00 2010 
+*********************************************** 
+Number of test functions: 10 
+Number of errors: 0 
+Number of failures: 0 
+
+ 
+1 Test Suite : 
+DatABEL unit testing - 10 test functions, 0 errors, 0 failures
+
+
+
+Details 
+*************************** 
+Test Suite: DatABEL unit testing 
+Test function regexp: ^test.+ 
+Test file regexp: ^runit.+\.[rR]$ 
+Involved directory: 
+/Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests 
+--------------------------- 
+Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.apply2dfo.R 
+test.apply2dfo: (8 checks) ... OK (87.05 seconds)
+test.empty: (0 checks) ... OK (0 seconds)
+--------------------------- 
+Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.generate_and_read_small_files.R 
+test.as.databel_base_R: (46 checks) ... OK (31.82 seconds)
+test.empty: (0 checks) ... OK (0 seconds)
+test.save_as: (15 checks) ... OK (13.93 seconds)
+test.write_databel_base_R: (0 checks) ... OK (0 seconds)
+--------------------------- 
+Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.read_large_file.R 
+test.databel_base_R_large_file_reads: (101507 checks) ... OK (208.86 seconds)
+test.empty: (0 checks) ... OK (0 seconds)
+--------------------------- 
+Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.text2filevector.R 
+test.empty: (0 checks) ... OK (0 seconds)
+test.text2filevector: (18 checks) ... OK (702.79 seconds)

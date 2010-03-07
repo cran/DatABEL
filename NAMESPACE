@@ -1,0 +1,47 @@
+useDynLib(DatABEL)
+
+import(methods)
+
+export(
+	apply2dfo,
+	databel_base_R,
+	databel_filtered_R,
+	make_empty_fvf,
+# BEGIN INTERNAL
+	process_lm_output,
+	matrix2databel_base_R,
+# END INTERNAL
+# BEGIN UTIL
+	get_temporary_file_name,
+	extract_text_file_columns,
+	process_lm_output,
+	process_simple_output,
+	sum_NA,
+	sum_not_NA,
+# END UTIL
+	text2filevector
+       )
+
+exportClasses(
+	"databel_filtered_R",
+	"databel_base_R"
+	)
+
+exportMethods(
+#	"show",
+	"connect",
+	"disconnect",
+	"backingfilename",
+	"cachesizeMb",
+	"cachesizeMb<-",
+	"get_dimnames",
+	"set_dimnames<-",
+#	"as.databel_base_R",
+	"save_as"
+	)
+
+#S3method(as.vector,databel_base_R)
+#S3method(as.matrix,databel_base_R)
+#S3method(as.matrix,databel_filtered_R)
+#S3method(as.databel_base_R,matrix)
+
