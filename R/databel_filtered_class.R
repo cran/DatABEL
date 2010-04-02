@@ -14,7 +14,7 @@ setClass(
 				usedRowIndex = "integer",	
 				usedColIndex = "integer",	
 				unique.names = "logical",		# NULL if not used
-				unique.colnames = "logical",		# NULL if not used
+				unique.colnames = "logical",	# NULL if not used
 				unique.rownames = "logical"		# NULL if not used
 #				"databel_base_R" 
 #				base_data = "matrix" 
@@ -131,6 +131,30 @@ setMethod(
 		}
 );
 
+#setGeneric(
+#		name = "set_dimnames<-",
+#		def = function(x,value) {standardGeneric("set_dimnames<-");}
+#);
+
+setMethod(
+		f = "set_dimnames<-",
+		signature = "databel_filtered_R",
+		definition = function(x,value)
+		{
+			class(x) <- "databel_base_R"
+			set_dimnames(x) <- value 
+			class(x) <- "databel_filtered_R"
+			if (length(unique(value[[1]]))==dim(x)[1]) 
+				x@unique.rownames <- TRUE else x@unique.rownames <- FALSE
+			if (length(unique(value[[2]]))==dim(x)[2]) 
+				x@unique.colnames <- TRUE else x@unique.colnames <- FALSE
+			if (x@unique.colnames && x@unique.rownames) 
+				x@unique.names <- TRUE else x@unique.names <- FALSE
+			return(x)
+		}
+);
+
+
 
 setMethod(
 		f = "dimnames",
@@ -151,6 +175,9 @@ setMethod(
 		signature = "databel_filtered_R",
 		definition = function(x,value)
 		{
+			if (length(value[[1]]) != length(unique(value[[1]]))) stop("non-unigue names in dim [[1]] (use set_dimnames?)")
+			if (length(value[[2]]) != length(unique(value[[2]]))) stop("non-unigue names in dim [[2]] (use set_dimnames?)")
+			x@unique.names <- x@unique.colnames <- x@unique.rownames <- TRUE
 			class(x) <- "databel_base_R"
 			set_dimnames(x) <- value 
 			class(x) <- "databel_filtered_R"

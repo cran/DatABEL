@@ -5,7 +5,7 @@ if(FALSE) {
 library("RUnit")
 library("DatABEL")
 }
-test.empty <- function(){}
+#test.empty <- function(){}
 ### do not run
 #stop("SKIP THIS TEST")
 ###
@@ -89,7 +89,10 @@ test.databel_base_R_large_file_reads <- function()
 		fv_data <- databel_base_R(tmpname2)
 	}
 	
-	if (!(file.exists(tmpname1) && file.exists(tmpname1))) return(NULL)	
+	if (!(file.exists(tmpname1) && file.exists(tmpname1))) {
+		warning(paste("file",tmpname1,"is missing; stopping tests"))
+		return(NULL)
+	}
 	fv_data <- databel_base_R(fv_filename)
 	
 	# check if nothing works with disconnected

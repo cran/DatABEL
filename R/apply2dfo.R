@@ -30,17 +30,31 @@
 #' b <- as(a,"databel_filtered_R")
 #' apply(a,FUN="sum",MAR=2)
 #' apply2dfo(SNP,dfodata=b,anFUN="sum")
+#' tA <- apply2dfo(SNP,dfodata=b,anFUN="sum",outclass="databel_filtered_R",outfile="tmpA")
+#' tA
+#' as(tA,"matrix")
 #' apply2dfo(SNP,dfodata=b,anFUN="sum",transpose=FALSE)
+#' tB <- apply2dfo(SNP,dfodata=b,anFUN="sum",transpose=FALSE,outclass="databel_filtered_R",outfile="tmpB")
+#' tB
+#' as(tB,"matrix")
 #' 
 #' sex <- 1*(runif(10)>.5)
 #' trait <- rnorm(10)+sex+as(b[,2],"vector")+as(b[,2],"vector")*sex*5
 #' apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm")
+#' tC <- apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",outclass="databel_filtered_R",outfile="tmpC")
+#' tC
+#' as(tC,"matrix")
+#' apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",transpose=FALSE)
+#' tD <- apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",transpose=FALSE,outclass="databel_filtered_R",outfile="tmpD")
+#' tD
+#' as(tD,"matrix")
 #' 
 
 
 apply2dfo <- function(..., dfodata,anFUN="lm",MAR=2,procFUN,
 		outclass="matrix",outfile,type="DOUBLE",transpose=TRUE)
 {
+	#print("AAA")
 	### should also implement a case when outfile exists?
 	if (missing(procFUN))
 		if (any(c("lm","glm","coxph") == anFUN)) procFUN <- "process_lm_output"
@@ -51,19 +65,25 @@ apply2dfo <- function(..., dfodata,anFUN="lm",MAR=2,procFUN,
 	
 	if (missing(dfodata)) stop("dfodata should be supplied")
 	if (class(dfodata) != "databel_filtered_R") stop("dfodata should be of calss databel_filtered_R")
+	
 	if (MAR == 1)
-		SNP <- as.matrix(dfodata[1,])
+		SNP <- as(dfodata[1,],"matrix")
 	else if (MAR ==2)
-		SNP <- as.matrix(dfodata[,1])
+		SNP <- as(dfodata[,1],"matrix")
 	else stop("MAR should be 1 or 2")
+	
+	#print("BBBB")
+	
 	tmpout <- procFUN(eval(substitute(anFUN( ... ))))
-#print(tmpout)
-#print(dimnames(tmpout))
+	
+	#print(tmpout)
+	#print(dimnames(tmpout))
 	dimout <- dim(tmpout)
 	if (is.null(dimout)) dimout <- c(1,length(tmpout))
 	namout <- dimnames(tmpout)
-#print(tmpout)
-#print(dimout)
+	#print(tmpout)
+	#print(dimout)
+	
 	if (outclass == "matrix") {
 		if (transpose)
 			res <- matrix(ncol=dimout[2],nrow=(dimout[1])*(dim(dfodata)[MAR]))
@@ -105,18 +125,28 @@ apply2dfo <- function(..., dfodata,anFUN="lm",MAR=2,procFUN,
 #	if (MAR == 1) oMAR <- 2; else oMAR <- 1;
 	
 	if (transpose) {
-		if (!is.null(colnames(tmpout)))
-			colnames(res) <- colnames(tmpout)
+		if (!is.null(colnames(tmpout))) {
+			#print("i-go-go")
+			dimnames(res)[[2]] <- colnames(tmpout)
+		}
 	} else {
-		if (dimout[1]==1) 
-			colnames(res) <- dimnames(dfodata)[[MAR]]
-		else {
-			colnames(res) <- paste(as.vector(t(
+		if (dimout[1]==1) { 
+			#print("o-ho-ho")
+			#print(MAR)
+			#print(dim(res))
+			#print(dim(dfodata))
+			#print(dimnames(dfodata)[[2]])
+			if (!is.null(dimnames(dfodata)[[MAR]]))
+				dimnames(res)[[2]] <- dimnames(dfodata)[[MAR]]
+		} else {
+			#print("a-ha-ha")
+			dimnames(res)[[2]] <- paste(as.vector(t(
 									matrix(rep(dimnames(dfodata)[[MAR]],dimout[1]),ncol=dimout[1])
 							)),
 					dimnames(tmpout)[[1]],sep="_")
 		}
 	} 
+	#print("set dimnames[[2]]")
 	
 	
 #print(c("aaa",dim(res)))
@@ -125,21 +155,25 @@ apply2dfo <- function(..., dfodata,anFUN="lm",MAR=2,procFUN,
 		#print(dimout[1])
 		#print(dimnames(dfodata)[[2]])
 		#print(dim(res))
-		if (dimout[1]==1) 
-			rownames(res) <- dimnames(dfodata)[[MAR]]
-		else {
+		if (dimout[1]==1) {
+			if (!is.null(dimnames(dfodata)[[MAR]]))
+				dimnames(res)[[1]] <- dimnames(dfodata)[[MAR]]
+		} else {
+			#print("there")
 			#print(dimnames(dfodata)[[2]])
 			#print(dimout[1])
 			#print(dimnames(tmpout)[[1]])
-			rownames(res) <- paste(as.vector(t(
-									matrix(rep(dimnames(dfodata)[[MAR]],dimout[1]),ncol=dimout[1])
-							)),
-					dimnames(tmpout)[[1]],sep="_")
+			if (!is.null(dimnames(dfodata)[[MAR]]))
+				dimnames(res)[[1]] <- paste(as.vector(t(
+										matrix(rep(dimnames(dfodata)[[MAR]],dimout[1]),ncol=dimout[1])
+								)),
+						dimnames(tmpout)[[1]],sep="_")
 		}
 	} else {
-		if (!is.null(colnames(tmpout)))
-			rownames(res) <- colnames(tmpout)
-		
+		if (!is.null(colnames(tmpout))) {
+			dimnames(res)[[1]] <- colnames(tmpout)
+		}
 	}
+	#print("set dimnames[[1]]")
 	return(res)
 }

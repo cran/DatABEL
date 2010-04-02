@@ -6,22 +6,25 @@ if(FALSE) {
 	library("DatABEL")
 }
 
-test.empty <- function(){}
+#test.empty <- function(){}
 ### do not run
 #stop("SKIP THIS TEST")
 ###
 
 ### ---- common functions and data -----
 
-source("../inst/unitTests/shared_functions.R")
+#source("../inst/unitTests/shared_functions.R")
+source(paste(path,"/shared_functions.R",sep=""))
 
 ### --- Test functions ---
 
 test.apply2dfo <- function()
 {
+#	testmatr <- make_random_matrix(range_dim1=c(10,100),range_dim2=c(10,100),range_data = c(-10,10))
 	testmatr <- make_random_matrix(range_data = c(-10,10))
 	dfo <- as(testmatr,"databel_filtered_R")
 
+	unlink("tmp*")
 	res0 <- apply(testmatr,MAR=2,FUN=sum)
 	print("res0")
 	print(res0)
@@ -38,6 +41,8 @@ test.apply2dfo <- function()
 	checkEqualsNumeric(as(res0,"vector"),as(res2,"vector"),tol=5*sqrt(.Machine$double.eps))
 	checkEqualsNumeric(as(res0,"vector"),as(res3,"vector"),tol=5*sqrt(.Machine$double.eps))
 	checkEqualsNumeric(as(res0,"vector"),as(res4,"vector"),tol=5*sqrt(.Machine$double.eps))
+	rm(res1,res2,res3,res4)
+	gc()
 	unlink("tmp*")
 	
 	res0 <- apply(testmatr,MAR=1,FUN=sum)
@@ -56,6 +61,8 @@ test.apply2dfo <- function()
 	checkEqualsNumeric(as(res0,"vector"),as(res2,"vector"),tol=5*sqrt(.Machine$double.eps))
 	checkEqualsNumeric(as(res0,"vector"),as(res3,"vector"),tol=5*sqrt(.Machine$double.eps))
 	checkEqualsNumeric(as(res0,"vector"),as(res4,"vector"),tol=5*sqrt(.Machine$double.eps))
+	rm(res1,res2,res3,res4)
+	gc()
 	unlink("tmp*")
 
 }

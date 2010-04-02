@@ -8,6 +8,7 @@
 \alias{dim,databel_filtered_R-method}
 \alias{dimnames,databel_filtered_R-method}
 \alias{dimnames<-,databel_filtered_R-method}
+\alias{set_dimnames<-,databel_filtered_R-method}
 \alias{length,databel_filtered_R-method}
 \alias{save_as,databel_filtered_R-method}
 
@@ -56,6 +57,7 @@ Class \code{"\linkS4class{databel_base_R}"}, directly, with explicit coerce.
     \item{dim}{\code{signature(x = "databel_filtered_R")}: returns dimensions of the matrix }
     \item{dimnames}{\code{signature(x = "databel_filtered_R")}: returns row and column names }
     \item{dimnames<-}{\code{signature(x = "databel_filtered_R")}: sets row and column names }
+    \item{set_dimnames<-}{\code{signature(x = "databel_filtered_R")}: sets row and column names (these could be non-unique) }
     \item{length}{\code{signature(x = "databel_filtered_R")}: returns number of elements in the matrix }
     \item{save_as}{\code{signature(x = "databel_filtered_R")}: saves (a sub-set of) the object }    
 	 }

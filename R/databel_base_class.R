@@ -63,7 +63,7 @@ setMethod(
 				stop("cach size must be positive integer")
 			
 			.Object@backingfilename = as.character(filename)
-			address <- .Call("open_float_FileMatrix_R",
+			address <- .Call("open_FileMatrix_R",
 					fname = as.character(filename), 
 					csize = as.integer(cachesizeMb),
 					PACKAGE="DatABEL"

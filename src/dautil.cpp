@@ -25,7 +25,7 @@ extern "C" {
 	{
 		std::string filename = CHAR(STRING_ELT(Filename,0));
 		int ncols = (int) LENGTH(Whichcol);
-		int whichcol[ncols];
+		std::vector<int> whichcol(ncols);
 		int maxcol = 0;
 		for (int i=0;i<ncols;i++)
 		{

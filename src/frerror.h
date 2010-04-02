@@ -16,6 +16,6 @@
 void error(const char * format, ... );
 void warning(const char * format, ... );
 void message(const char * format, ... );
-void messageOnOff(int bit);
+//void messageOnOff(int bit);
 
 #endif

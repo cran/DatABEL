@@ -1,6 +1,6 @@
 
 
-make_random_matrix <- function(range_dim1 = c(200,2000), range_dim2 = c(200,2000), range_data = c(-1e16,1e16), type="double")
+make_random_matrix <- function(range_dim1 = c(200,1000), range_dim2 = c(200,1000), range_data = c(-1e16,1e16), type="double")
 #make_random_matrix <- function(range_dim1 = c(500,1919), range_dim2 = c(1000,5000), range_data = c(-1e16,1e16), type="double")
 #make_random_matrix <- function(range_dim1 = c(1000,3000), range_dim2 = c(1000,3000), range_data = c(-1e16,1e16), type="double")
 #make_random_matrix <- function(range_dim1 = c(100,300), range_dim2 = c(100,300), range_data = c(-1e16,1e16), type="double")

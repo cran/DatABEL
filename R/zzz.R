@@ -1,3 +1,3 @@
 .onLoad <- function(lib, pkg) {
-	.Call("DatABELBaseCPP_init")
+	.Call("AbstractMatrix_init")
 }

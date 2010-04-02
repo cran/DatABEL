@@ -2,6 +2,10 @@
 	This function should be re-implemented using Rprintf
 	if compiled as a part of R library
 */
+#if COMPILE_WITH_R
+#include <R.h>
+#endif
+
 #include "frerror.h"
 
 void error (const char * format, ... )
@@ -48,7 +52,3 @@ void message (const char * format, ... )
 #endif
 }
 
-void messageOnOff(int bit)
-{
-    message(bit?"ON":"OFF");
-}

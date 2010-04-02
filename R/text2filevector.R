@@ -77,26 +77,26 @@
 #' text2filevector(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames.fvf",
 #' 					colnames="test_matrix.colnames",rownames="test_matrix.rownames") 
 #' x <- databel_filtered_R("test_matrix_NOnames.fvf")
-#' if (!identical(data,as.matrix(x))) stop("not identical data")
+#' if (!identical(data,as(x,"matrix"))) stop("not identical data")
 #' 
 #' text2filevector(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames_T.fvf",
 #' 					colnames="test_matrix.colnames",rownames="test_matrix.rownames",transpose=TRUE) 
 #' x <- databel_filtered_R("test_matrix_NOnames_T.fvf")
-#' if (!identical(data,t(as.matrix(x)))) stop("not identical data")
+#' if (!identical(data,t(as(x,"matrix")))) stop("not identical data")
 #' 
 #' text2filevector(infile="test_matrix_rownames.dat",outfile="test_matrix_rownames.fvf",
 #' 					rownames=1,colnames="test_matrix.colnames") 
 #' x <- databel_filtered_R("test_matrix_rownames.fvf")
-#' if (!identical(data,as.matrix(x))) stop("not identical data")
+#' if (!identical(data,as(x,"matrix"))) stop("not identical data")
 #' 
 #' text2filevector(infile="test_matrix_colnames.dat",outfile="test_matrix_colnames.fvf",
 #' 					colnames=1,rownames="test_matrix.rownames") 
 #' x <- databel_filtered_R("test_matrix_colnames.fvf")
-#' if (!identical(data,as.matrix(x))) stop("not identical data")
+#' if (!identical(data,as(x,"matrix"))) stop("not identical data")
 #' 
 #' text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames.fvf",R_matrix=TRUE) 
 #' x <- databel_filtered_R("test_matrix_dimnames.fvf")
-#' if (!identical(data,as.matrix(x))) stop("not identical data")
+#' if (!identical(data,as(x,"matrix"))) stop("not identical data")
 #' 
 #' # stupid extended matrix in non-R format
 #' newmat <- matrix(-100,ncol=NC+3,nr=NR+2)
@@ -109,7 +109,7 @@
 #' text2filevector(infile="test_matrix_strange.dat",outfile="test_matrix_strange.fvf",
 #' 					colnames=2,rownames=3) 
 #' x <- databel_filtered_R("test_matrix_strange.fvf")
-#' if (!identical(data,as.matrix(x))) stop("not identical data")
+#' if (!identical(data,as(x,"matrix"))) stop("not identical data")
 #' 
 #' }
 #' 

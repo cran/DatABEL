@@ -6,14 +6,15 @@ if(FALSE) {
 	library("DatABEL")
 }
 
-test.empty <- function(){}
+#test.empty <- function(){}
 ### do not run
 #stop("SKIP THIS TEST")
 ###
 
 ### ---- common functions and data -----
 
-source("../inst/unitTests/shared_functions.R")
+#source("../inst/unitTests/shared_functions.R")
+source(paste(path,"/shared_functions.R",sep=""))
 
 ### --- Test functions ---
 
@@ -38,8 +39,10 @@ test.as.databel_base_R <- function()
 	checkNumEq(testmatr,test_fv)
 	
 	# try to ini using the same name
+	print(system("ls -al"))
 	checkException(test_fv <- matrix2databel_base_R(testmatr,file="tmp",type="DOUBLE"))
 	
+	rm(test_vf);gc()
 	unlink("tmp*")
 	
 	#define UNSIGNED_SHORT_INT 1
@@ -50,6 +53,7 @@ test.as.databel_base_R <- function()
 	test_fv <- matrix2databel_base_R(testmatr,file="tmp",type="UNSIGNED_SHORT_INT")
 	checkNumEq(testmatr,test_fv)
 	
+	rm(test_vf,testmatr);gc()
 	unlink("tmp*")
 	
 	#define SHORT_INT          2
@@ -60,7 +64,9 @@ test.as.databel_base_R <- function()
 	test_fv <- matrix2databel_base_R(testmatr,file="tmp",type="SHORT_INT")
 	checkNumEq(testmatr,test_fv)
 	
+	rm(test_vf,testmatr);gc()
 	unlink("tmp*")
+	
 	
 	#define UNSIGNED_INT       3
 	testmatr <- make_random_matrix(range_data = c(0,100000), type="integer")
@@ -70,6 +76,7 @@ test.as.databel_base_R <- function()
 	test_fv <- matrix2databel_base_R(testmatr,file="tmp",type="UNSIGNED_INT")
 	checkNumEq(testmatr,test_fv)
 	
+	rm(test_vf,testmatr);gc()
 	unlink("tmp*")
 	
 	#define INT                4
@@ -80,6 +87,7 @@ test.as.databel_base_R <- function()
 	test_fv <- matrix2databel_base_R(testmatr,file="tmp",type="INT")
 	checkNumEq(testmatr,test_fv)
 	
+	rm(test_vf,testmatr);gc()
 	unlink("tmp*")
 	
 	#define FLOAT              5
@@ -87,6 +95,7 @@ test.as.databel_base_R <- function()
 	test_fv <- matrix2databel_base_R(testmatr,file="tmp",type="FLOAT")
 	checkNumEq(testmatr,test_fv)
 	
+	rm(test_vf,testmatr);gc()
 	unlink("tmp*")
 	
 	#define DOUBLE             6
@@ -97,6 +106,7 @@ test.as.databel_base_R <- function()
 	test_fv <- matrix2databel_base_R(testmatr,file="tmp",type="DOUBLE")
 	checkNumEq(testmatr,test_fv)
 	
+	rm(test_vf,testmatr);gc()
 	unlink("tmp*")
 	
 }

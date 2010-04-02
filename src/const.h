@@ -1,7 +1,7 @@
 #ifndef __CONST_H__
 #define __CONST_H__
 
-// nuber of reserved longs in fr_type
+// nuber of reserved longs in FileHeader
 #define RESERVEDSPACE      5
 
 // internal format data types
