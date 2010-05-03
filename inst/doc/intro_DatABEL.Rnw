@@ -38,7 +38,7 @@ make_random_matrix <- function(range_dim1 = c(2,10), range_dim2 = c(2,10), range
 
 testmatr <- make_random_matrix()
 testmatr
-test_fv <- as(testmatr,"databel_base_R")
+test_fv <- as(testmatr,"databel")
 test_fv
 as(test_fv,"matrix")
 abs(testmatr-as(test_fv,"matrix"))<1e-6
@@ -46,7 +46,7 @@ abs(testmatr-as(test_fv,"matrix"))<1e-6
 write.table(testmatr,file="test_matrix_dimnames.dat",row.names=TRUE,col.names=TRUE,quote=FALSE)
 
 text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames",R_matrix=TRUE) 
-x <- databel_filtered_R("test_matrix_dimnames")
+x <- databel("test_matrix_dimnames")
 x
 tmp <- as(x,"matrix")
 tmp
@@ -54,7 +54,7 @@ abs(testmatr-tmp)<1e-6
 
 text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames_T",
 		R_matrix=TRUE,transpose=TRUE) 
-x <- databel_filtered_R("test_matrix_dimnames_T")
+x <- databel("test_matrix_dimnames_T")
 t(testmatr)
 x
 tmp <- as(x,"matrix")

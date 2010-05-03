@@ -1,6 +1,6 @@
-#' converts matrix to 'databel_base_R'
+#' converts matrix to 'databel'
 #' 
-#' Converts regular R matrix to \code{\linkS4class{databel_base_R-class}} object. 
+#' Converts regular R matrix to \code{\linkS4class{databel}} object. 
 #' This is the procedure used by "as" converting to DatABEL objects, 
 #' in which case a temporary file name is created
 #' 
@@ -9,19 +9,19 @@
 #' @param cachesizeMb cache size to be used when accessing the object
 #' @param type type of data to use for storage ("DOUBLE", "FLOAT", "INT", 
 #' "UNSIGNED_INT", "UNSIGNED_SHORT_INT", "SHORT_INT")
+#' @param readonly whether to generate new 'databel' in read only mode 
 #' 
-#' @return object of class \code{\linkS4class{databel_base_R-class}}
+#' @return object of class \code{\linkS4class{databel}}
 #' 
 #' @author Yurii Aulchenko
 #' 
 
-matrix2databel_base_R <- function(from, filename, cachesizeMb = 64, type = "DOUBLE") {
+matrix2databel <- function(from, filename, cachesizeMb = 64, type = "DOUBLE", readonly = FALSE) {
 # a bit dirty
-	make_empty_fvf(as.character(filename),nvar=dim(from)[2],nobs=dim(from)[1],type=type)
-	to <- databel_base_R(as.character(filename),as.integer(cachesizeMb))
+	to <- make_empty_fvf(as.character(filename),nvar=dim(from)[2],nobs=dim(from)[1],type=type,readonly=readonly)
 	to[] <- from
 	matrix_dimnames <- dimnames(from)
 	if (!is.null(matrix_dimnames)) set_dimnames(to) <- matrix_dimnames
-	to
+	return(to)
 }
 

@@ -38,10 +38,13 @@
 #' "write.table(...,col.mnames=TRUE,row.names=TRUE)"
 #' @param type data DatABEL type to use ("DOUBLE", "FLOAT", "INT", 
 #' "UNSIGNED_INT", "UNSIGNED_SHORT_INT", "SHORT_INT")
+#' @param cachesizeMb cache size for the resulting 'databel-class' object
+#' @param readonly whether the resulting 'databel-class' object should 
+#' be opened in readonly mode
 #' 
 #' @author  Yurii Aulchenko
 #' 
-#' @return file converted is stored in file system, databel_filtered_R 
+#' @return file converted is stored in file system, \link{databel-class} 
 #' object connection to the file
 #' 
 #' @examples 
@@ -68,7 +71,7 @@
 #' 
 #' # generate identical data
 #' text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames",R_matrix=TRUE) 
-#' x <- databel_filtered_R("test_matrix_dimnames")
+#' x <- databel("test_matrix_dimnames")
 #' data <- as(x,"matrix")
 #' data
 #' 
@@ -76,26 +79,26 @@
 #' 
 #' text2filevector(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames.fvf",
 #' 					colnames="test_matrix.colnames",rownames="test_matrix.rownames") 
-#' x <- databel_filtered_R("test_matrix_NOnames.fvf")
+#' x <- databel("test_matrix_NOnames.fvf")
 #' if (!identical(data,as(x,"matrix"))) stop("not identical data")
 #' 
 #' text2filevector(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames_T.fvf",
 #' 					colnames="test_matrix.colnames",rownames="test_matrix.rownames",transpose=TRUE) 
-#' x <- databel_filtered_R("test_matrix_NOnames_T.fvf")
+#' x <- databel("test_matrix_NOnames_T.fvf")
 #' if (!identical(data,t(as(x,"matrix")))) stop("not identical data")
 #' 
 #' text2filevector(infile="test_matrix_rownames.dat",outfile="test_matrix_rownames.fvf",
 #' 					rownames=1,colnames="test_matrix.colnames") 
-#' x <- databel_filtered_R("test_matrix_rownames.fvf")
+#' x <- databel("test_matrix_rownames.fvf")
 #' if (!identical(data,as(x,"matrix"))) stop("not identical data")
 #' 
 #' text2filevector(infile="test_matrix_colnames.dat",outfile="test_matrix_colnames.fvf",
 #' 					colnames=1,rownames="test_matrix.rownames") 
-#' x <- databel_filtered_R("test_matrix_colnames.fvf")
+#' x <- databel("test_matrix_colnames.fvf")
 #' if (!identical(data,as(x,"matrix"))) stop("not identical data")
 #' 
 #' text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames.fvf",R_matrix=TRUE) 
-#' x <- databel_filtered_R("test_matrix_dimnames.fvf")
+#' x <- databel("test_matrix_dimnames.fvf")
 #' if (!identical(data,as(x,"matrix"))) stop("not identical data")
 #' 
 #' # stupid extended matrix in non-R format
@@ -108,13 +111,14 @@
 #' 
 #' text2filevector(infile="test_matrix_strange.dat",outfile="test_matrix_strange.fvf",
 #' 					colnames=2,rownames=3) 
-#' x <- databel_filtered_R("test_matrix_strange.fvf")
+#' x <- databel("test_matrix_strange.fvf")
 #' if (!identical(data,as(x,"matrix"))) stop("not identical data")
 #' 
 #' }
 #' 
 
-text2filevector <- function(infile,outfile,colnames,rownames,skipcols,skiprows,transpose=FALSE,R_matrix=FALSE,type="DOUBLE")
+text2filevector <- function(infile,outfile,colnames,rownames,skipcols,skiprows,
+		transpose=FALSE,R_matrix=FALSE,type="DOUBLE",cachesizeMb=64,readonly=TRUE)
 {
 # text2fvf(c("./ERF3.impute.chr21.gen.geno","./ERF3.impute.chr21.gen.geno.fvfR","./test.colnames"),as.integer(c(2,1,1,5)))
 # text2fvf(c("ERF3.impute.chr21.gen.geno","ERF3.impute.chr21.gen.geno.fvfR","test.colnames"),as.integer(c(2,1,1,5)))
@@ -153,6 +157,5 @@ text2filevector <- function(infile,outfile,colnames,rownames,skipcols,skiprows,t
 	#print(charnames)
 	#print(intnames)
 	tmp <- .Call("text2fvf_R",charnames,intnames,package="DatABEL")
-	# for some reason it will not work without the last line!!!
-	return(databel_filtered_R(outfile))
+	return(databel(outfile,cachesizeMb=cachesizeMb,readonly=readonly))
 }

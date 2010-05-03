@@ -1,12 +1,12 @@
-RUNIT TEST PROTOCOL -- Sun Apr  4 00:16:37 2010 
+RUNIT TEST PROTOCOL -- Tue May  4 20:38:40 2010 
 *********************************************** 
-Number of test functions: 6 
+Number of test functions: 9 
 Number of errors: 0 
 Number of failures: 0 
 
  
 1 Test Suite : 
-DatABEL unit testing - 6 test functions, 0 errors, 0 failures
+DatABEL unit testing - 9 test functions, 0 errors, 0 failures
 
 
 
@@ -19,15 +19,22 @@ Involved directory:
 /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests 
 --------------------------- 
 Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.apply2dfo.R 
-test.apply2dfo: (8 checks) ... OK (80.34 seconds)
+test.apply2dfo: (8 checks) ... OK (21.05 seconds)
+--------------------------- 
+Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.databel_class.R 
+test.databel_class: (69 checks) ... OK (3.72 seconds)
 --------------------------- 
 Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.generate_and_read_small_files.R 
-test.as.databel_base_R: (46 checks) ... OK (7.79 seconds)
-test.save_as: (15 checks) ... OK (3.25 seconds)
-test.write_databel_base_R: (0 checks) ... OK (0 seconds)
+test.as.databel: (46 checks) ... OK (11.09 seconds)
+test.save_as: (18 checks) ... OK (1.49 seconds)
+test.write_databel: (0 checks) ... OK (0 seconds)
+--------------------------- 
+Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.iterator.R 
+test.empty: (0 checks) ... OK (0 seconds)
+test.iterator: (8 checks) ... OK (0.37 seconds)
 --------------------------- 
 Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.read_large_file.R 
-test.databel_base_R_large_file_reads: (101507 checks) ... OK (196.3 seconds)
+test.databel_large_file_reads: (165 checks) ... OK (226.27 seconds)
 --------------------------- 
 Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.text2filevector.R 
-test.text2filevector: (18 checks) ... OK (0.57 seconds)
+test.text2filevector: (18 checks) ... OK (0.82 seconds)

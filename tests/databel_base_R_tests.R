@@ -12,8 +12,8 @@ colnames(dta) <- paste("col",1:NVAR,sep="")
 rownames(dta) <- paste("row",1:NOBS,sep="")
 dim(dta)
 
-# create databel_base_R based on test data in different ways and test
-x <- as(dta,"databel_base_R")
+# create databel based on test data in different ways and test
+x <- as(dta,"databel")
 class(x)
 testobject(dta,as(x,"matrix"))
 disconnect(x)
@@ -21,11 +21,11 @@ connect(x)
 class(x)
 testobject(dta,as(x,"matrix"))
 
-x <- matrix2databel_base_R(dta,file="test.fvf",cachesizeMb=128)
+x <- matrix2databel(dta,file="test.fvf",cachesizeMb=128)
 class(x)
 testobject(dta,as(x,"matrix"))
 
-x <- as(dta,"databel_base_R")
+x <- as(dta,"databel")
 class(x)
 testobject(dta,as(x,"matrix"))
 
@@ -35,7 +35,7 @@ system("rm tmp*fv* test*fv*")
 
 #
 
-x <- matrix2databel_base_R(dta,file="test.fvf",cachesizeMb=128)
+x <- matrix2databel(dta,file="test.fvf",cachesizeMb=128)
 class(dta)
 class(x)
 dta
@@ -44,7 +44,7 @@ rm(x)
 gc()
 
 # load object
-x <- databel_base_R("test.fvf",64)
+x <- databel("test.fvf",64,readonly=FALSE)
 x
 table(abs(as(x,"matrix")-dta)>1e-7)
 testobject(dta,x)
@@ -56,9 +56,10 @@ testobject(dta,x,FUN=as.vector)
 #class(x[1:3,1:5])
 
 # [<-    keeping class
+# fails here
+# setReadOnly(x) <- FALSE
 x[2,] <- rnorm(ncol(x))+100
 x[,3] <- rnorm(nrow(x))+100
-class(x)
 class(x)
 x
 x[]
@@ -85,13 +86,13 @@ x
 # !cbind
 # !rbind
 #
-# is.databel_base_R
-is(x,"databel_base_R")
-is(c(0,1,2),"databel_base_R")
+# is.databel
+is(x,"databel")
+is(c(0,1,2),"databel")
 
-# as.databel_base_R -- not real yet
+# as.databel -- not real yet
 tmp <- matrix(rnorm(5*7),5,7)
-tmp1 <- as(tmp,"databel_base_R")
+tmp1 <- as(tmp,"databel")
 
 # as.matrix
 class(x)
@@ -123,7 +124,7 @@ x@data
 x
 
 # connect
-connect(x)
+connect(x,readonly=FALSE)
 x
 
 #

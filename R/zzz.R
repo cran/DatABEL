@@ -1,3 +1,3 @@
 .onLoad <- function(lib, pkg) {
-	.Call("AbstractMatrix_init")
+	cat("DatABEL v 0.1-0 loaded\n")
 }

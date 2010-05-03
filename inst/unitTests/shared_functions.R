@@ -1,9 +1,8 @@
 
 
-make_random_matrix <- function(range_dim1 = c(200,1000), range_dim2 = c(200,1000), range_data = c(-1e16,1e16), type="double")
+make_random_matrix <- function(range_dim1 = c(20,40), range_dim2 = c(20,40), range_data = c(-1e16,1e16), type="double")
+#make_random_matrix <- function(range_dim1 = c(200,1000), range_dim2 = c(200,1000), range_data = c(-1e16,1e16), type="double")
 #make_random_matrix <- function(range_dim1 = c(500,1919), range_dim2 = c(1000,5000), range_data = c(-1e16,1e16), type="double")
-#make_random_matrix <- function(range_dim1 = c(1000,3000), range_dim2 = c(1000,3000), range_data = c(-1e16,1e16), type="double")
-#make_random_matrix <- function(range_dim1 = c(100,300), range_dim2 = c(100,300), range_data = c(-1e16,1e16), type="double")
 {
 	dim1 <- round(runif(1,range_dim1[1],range_dim1[2]))
 	dim2 <- round(runif(1,range_dim2[1],range_dim2[2]))
@@ -18,9 +17,24 @@ make_random_matrix <- function(range_dim1 = c(200,1000), range_dim2 = c(200,1000
 
 checkNumEq <- function(testmatr,test_fv,tolmult=5)
 {
-	checkEqualsNumeric(testmatr,as(test_fv,"matrix"),tolerance=tolmult*sqrt(.Machine$double.eps))
-	checkIdentical(dim(testmatr),dim(test_fv))
+    print("CheckNumEq()");
+    matr <- as(test_fv,"matrix")
+    print("testmatr = ");
+    show(testmatr);
+    print("matr = ");
+    show(matr)
+    print("test_fv = ");    
+    show(test_fv)
+	checkEqualsNumeric(testmatr,matr,tolerance=tolmult*sqrt(.Machine$double.eps))
+	# not 1x1 matrix ?
+	if (!is.null(dim(testmatr))) {
+	    checkIdentical(dim(testmatr),dim(test_fv))
+	}
 	dmn <- dimnames(test_fv)
 	if (is.null(dmn)) dmn <- get_dimnames(test_fv)
+	cat("dmn=")
+	show(dmn)
+	cat("dimnames(testmatr)=")
+	show(dimnames(testmatr))
 	checkIdentical(dimnames(testmatr),dmn)
 }	

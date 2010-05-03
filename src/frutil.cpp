@@ -65,7 +65,7 @@ void initializeEmptyFile(string filename, unsigned long numVariables, unsigned l
 {
     dbg << "Initializing empty file '" << filename << "', type " << type << "." << endl;
     string indexFilename = filename + FILEVECTOR_INDEX_FILE_SUFFIX;
-    string data_filename = filename + FILEVECTOR_DATA_FILE_SUFFIX;
+    string dataFilename = filename + FILEVECTOR_DATA_FILE_SUFFIX;
 
 	FileHeader fileHeader;
 	unsigned long desize = calcDataSize(type);
@@ -81,7 +81,7 @@ void initializeEmptyFile(string filename, unsigned long numVariables, unsigned l
 	if (override && bHeaderOrDataExists) {
 	    dbg << "Deleting existing file" << indexFilename << endl;
 	    unlink(indexFilename.c_str());
-	    unlink(data_filename.c_str());
+	    unlink(dataFilename.c_str());
 	}
 
 	if (!override && bHeaderOrDataExists) {
@@ -89,7 +89,7 @@ void initializeEmptyFile(string filename, unsigned long numVariables, unsigned l
 	}
 
 	ofstream indexFile(indexFilename.c_str(), ios::binary | ios::out);
-	ofstream dataFile(data_filename.c_str(), ios::binary | ios::out);
+	ofstream dataFile(dataFilename.c_str(), ios::binary | ios::out);
 
 	deepDbg << "Writing FileVector header." << endl;
     fileHeader.print();
@@ -152,3 +152,19 @@ void tokenize(const string& str, vector<string>& tokens, const string& delimiter
         pos = str.find_first_of(delimiters, lastPos);
     }
 }
+
+#define PART_SIZE INT_MAX
+void blockWriteOrRead(fstream& file, unsigned long length, char* data, bool writeAction){
+  unsigned long i;
+  unsigned long numParts = length/PART_SIZE;
+  for(i = 0; i <= numParts; i++){
+    unsigned long subLength =
+     (numParts>0 && i < numParts )?PART_SIZE:(length%PART_SIZE);
+    if (writeAction){
+      file.write(data+i*PART_SIZE, subLength);
+    } else {
+      file.read(data+i*PART_SIZE, subLength);
+    }
+  }
+}
+

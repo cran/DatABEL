@@ -55,5 +55,6 @@ template <class DT> void performCast(void*dest, DT&src, int destType) {
 void parseStringToArbType(string s, int destType, void *destData);
 unsigned short int dataTypeFromString(string type);
 string dataTypeToString(int type);
+string bufToString(short int dataType, char *data);
 
 #endif

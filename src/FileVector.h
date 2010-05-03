@@ -28,15 +28,16 @@ using namespace std;
 #define DB_RDONLY 4
 
 class FileVector: public AbstractMatrix {
-public:
-	string data_filename;
-	string indexFilename;
+private:
+    const string filename;
+	string dataFilename;
+    string indexFilename;
 	fstream dataFile;
 	fstream indexFile;
 	FileHeader fileHeader;
 	// row and column names
-	FixedChar * variableNames;
-	FixedChar * observationNames;
+	FixedChar *variableNames;
+	FixedChar *observationNames;
 	// size of header (descriptives + var/obs names)
 	unsigned long headerSize;
 	// cache size (Mb) requested by user
@@ -50,44 +51,44 @@ public:
 	unsigned long in_cache_to;
 	char * cached_data;
 	char * char_buffer;
-
-	// prototypes
+	bool readOnly;
+	bool updateNamesOnWrite;
+		
+public:
 	FileVector();
 	~FileVector();
-
-	bool readOnly;
-	bool updateNamesOnWrite;	
-
-	FileVector(string filename_toload, unsigned long cachesizeMb) {
+	FileVector(string iFilename, unsigned long cachesizeMb) : filename (iFilename) {
 		readOnly = false;
 		updateNamesOnWrite = false;
 		char_buffer = 0;
-		initialize(filename_toload, cachesizeMb);
+		initialize(cachesizeMb);
 	}
 
-	FileVector(string filename_toload, unsigned long cachesizeMb, bool iReadOnly) : readOnly(iReadOnly) {
+	FileVector(string iFilename, unsigned long cachesizeMb, bool iReadOnly) : filename(iFilename), readOnly(iReadOnly) {
 		updateNamesOnWrite = false;
 		char_buffer = 0;
-		initialize(filename_toload, cachesizeMb);
+		initialize(cachesizeMb);
     }
 
-	FileVector(char *filename_toload, unsigned long cachesizeMb) {
+	FileVector(char *iFilename, unsigned long cachesizeMb) : filename(string(iFilename)){
 		updateNamesOnWrite = false;
 		readOnly = false;
-		string filename(filename_toload);
+		string filename(iFilename);
 		char_buffer = 0;
-		initialize(filename_toload, cachesizeMb);
+		initialize(cachesizeMb);
 	}
 
-	FileVector(char *filename_toload, unsigned long cachesizeMb, bool iReadOnly) : readOnly(iReadOnly) {
+	FileVector(char *iFilename, unsigned long cachesizeMb, bool iReadOnly) : filename(string(iFilename)), readOnly(iReadOnly) {
 		updateNamesOnWrite = false;
-		string filename(filename_toload);
 		char_buffer = 0;
-		initialize(filename_toload, cachesizeMb);
+		initialize(cachesizeMb);
 	}
+	// for testing purposes
+	void getPrivateCacheData(unsigned long* cacheSizeNVars, unsigned long *inCachFrom, unsigned long *inCacheTo );
 
 	// these ones are the actual used to initialize and free up
-	void initialize(string filename, unsigned long cachesizeMb);
+	void initialize(unsigned long cachesizeMb);
+	void deInitialize();
 	// this one updates cache
 	void update_cache(unsigned long from_var);
 	// gives element number from varIdx & obsIdx
@@ -133,7 +134,9 @@ public:
 	void saveIndexFile();
 
 	virtual void setUpdateNamesOnWrite(bool bUpdate);
-
+    virtual AbstractMatrix* castToAbstractMatrix();
+    virtual bool setReadOnly(bool readOnly);
+    
 	// FOR FUTURE:
 	// very slow one!
 	//	DT * readObservation(unsigned long obsIdx);
@@ -141,12 +144,11 @@ public:
 	//	DT readElement(unsigned long nelment);
 private :
 	void copyVariable(char * to, char * from, int n, unsigned long * indexes );
-	void freeResources();
 };
 
 //global variables
-const string FILEVECTOR_DATA_FILE_SUFFIX=".fvd";
-const string FILEVECTOR_INDEX_FILE_SUFFIX=".fvi";
+const string FILEVECTOR_DATA_FILE_SUFFIX = ".fvd";
+const string FILEVECTOR_INDEX_FILE_SUFFIX = ".fvi";
 
 #endif
 

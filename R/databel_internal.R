@@ -1,5 +1,5 @@
 #
-# general databel_*_R classes util
+# general databel classes util
 #
 
 convert_intlogcha_index_to_int <- function(i,object, margin) 

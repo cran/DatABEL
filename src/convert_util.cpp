@@ -216,6 +216,9 @@ void text2fvf(string program_name, string infilename, string outfilename,
 	unsigned long rowCnt = 1;
 	unsigned long lineCnt = 1;
 
+	short element_size = out->getElementSize();
+	char* ArbTypeData = new (nothrow) char [(out->getNumObservations())*element_size];
+
 	while(getline(srcFile, line)) {
 		vector<string> lineWords;
 		tokenize(line, lineWords, " ");
@@ -251,21 +254,27 @@ void text2fvf(string program_name, string infilename, string outfilename,
 			}
 
 			char buf[20] = "01234567";
-			parseStringToArbType(lineWords[i], type, buf);
-			out->writeElement(rowCnt-1, colCnt, buf);
+			//parseStringToArbType(lineWords[i], type, buf);
+			//out->writeElement(rowCnt-1, colCnt, buf);
+			parseStringToArbType(lineWords[i], type, &ArbTypeData[colCnt*element_size]);
+			//out->writeElement(rowCnt-1, colCnt, (char*)ArbTypeData+i*element_size);
 			colCnt++;
 		}
 
+		out->writeVariable(rowCnt-1, (char*)ArbTypeData);
 		rowCnt++;
 		lineCnt++;
 	}
 
-	char * tmpstr;
+	delete [] ArbTypeData;
+
 	if (!colNamesFilePresents && cnrow < 0) for (unsigned long i=1;i<=numColumns;i++) {
+		char * tmpstr;
 		sprintf(tmpstr,"%lu",i);
 		extColNames.push_back(tmpstr);
 	}
 	if (!rowNamesFilePresents && cnrow < 0) for (unsigned long i=1;i<=numRows;i++) {
+		char * tmpstr;
 		sprintf(tmpstr,"%lu",i);
 		extRowNames.push_back(tmpstr);
 	}

@@ -2,76 +2,57 @@
 #include <string.h>
 #include <iostream>
 #include <vector>
-#include <map>
 #include <memory.h>
-#include <set>
 
 using namespace std;
 
 #include "FilteredMatrix.h"
+#include "CastUtils.h"
 #include "frutil.h"
 
 unsigned long FilteredMatrix::getCacheSizeInMb() {
-	return getNestedMatrix().getCacheSizeInMb();
+	return nestedMatrix->getCacheSizeInMb();
 }
-
-// calculates filtering map for multiply filtering
-void FilteredMatrix::fillUpIndexMap(vector<unsigned long> &v, IndexMap &m, IndexMap &result ){
-    set<unsigned long> s;
-    IndexMap::iterator i;
-    for(i=m.begin();i!=m.end();i++) {
-        deepDbg << "fillUpIndexMap: s.insert("<<i->second<<")"<< endl;
-        s.insert(i->second);
-    }
-    unsigned long k;
-    for (k=0;k<v.size();k++){
-        s.insert(v[k]);
-        deepDbg << "fillUpIndexMap: s.insert("<<v[k]<<") (from v)"<< endl;
-    }
-
-    k=0;
-    set<unsigned long>::iterator j;
-    for (j=s.begin();j!=s.end();j++) {
-        result[k] = *j;
-        deepDbg << "fillUpIndexMap: result.k["<<k<<"] = " << *j << endl;
-        k++;
-    }
-}
-
 
 void FilteredMatrix::setCacheSizeInMb( unsigned long cachesizeMb ) {
-    getNestedMatrix().setCacheSizeInMb(cachesizeMb);
+    nestedMatrix->setCacheSizeInMb(cachesizeMb);
 }
 
 void FilteredMatrix::setUpdateNamesOnWrite(bool bUpdate) {
-    getNestedMatrix().setUpdateNamesOnWrite(bUpdate);
+    nestedMatrix->setUpdateNamesOnWrite(bUpdate);
 }
 
 void FilteredMatrix::writeVariableName(unsigned long varIdx, FixedChar name) {
-    getNestedMatrix().writeVariableName(filteredToRealRowIdx[varIdx], name);
+    nestedMatrix->writeVariableName(filteredToRealRowIdx[varIdx], name);
 }
 
 void FilteredMatrix::writeObservationName(unsigned long obsIdx, FixedChar name) {
-    getNestedMatrix().writeObservationName(filteredToRealColIdx[obsIdx], name);
+    nestedMatrix->writeObservationName(filteredToRealColIdx[obsIdx], name);
 }
 
 FixedChar FilteredMatrix::readVariableName(unsigned long varIdx) {
-    return getNestedMatrix().readVariableName(filteredToRealRowIdx[varIdx]);
+    return nestedMatrix->readVariableName(filteredToRealRowIdx[varIdx]);
 }
 
 FixedChar FilteredMatrix::readObservationName(unsigned long obsIdx) {
-    return getNestedMatrix().readObservationName(filteredToRealColIdx[obsIdx]);
+    return nestedMatrix->readObservationName(filteredToRealColIdx[obsIdx]);
 }
 
 void FilteredMatrix::readVariable(unsigned long varIdx, void * outvec) {
     unsigned long i;
-    for(i=0;i<getNumObservations();i++){
-        readElement(varIdx, i, (char*)outvec + i * getElementSize());
+    fmDbg << "readVariable(" << varIdx << "), numObservations="<<getNumObservations()<<";" << endl;
+    char* data = new (nothrow) char[getElementSize() * nestedMatrix->getNumObservations()];
+    nestedMatrix->readVariable(this->filteredToRealRowIdx[varIdx], data);
+    for(i=0; i < this->filteredToRealColIdx.size(); i++){
+        memcpy(&((char*)outvec)[i*getElementSize()],
+         &data[this->filteredToRealColIdx[i]*getElementSize()],getElementSize());
     }
+    delete [] data;
 }
 
 void FilteredMatrix::readObservation(unsigned long obsIdx, void * outvec) {
     unsigned long i;
+    fmDbg << "readObservation(" << obsIdx << ");" << endl;
     for(i=0;i<getNumVariables();i++){
         readElement( i, obsIdx, (char*)outvec + i * getElementSize());
     }
@@ -83,23 +64,41 @@ void FilteredMatrix::writeObservation(unsigned long obsIdx, void * invec) {
         writeElement( i, obsIdx, (char*)invec + i * getElementSize());
     }
 }
-
+#define WRITE_SPEED_PROPORTION .01
 void FilteredMatrix::writeVariable(unsigned long varIdx, void *datavec) {
     unsigned long i;
-    deepDbg << "FilteredMatrix.writeVariable(" << varIdx << ")" << endl;
-    for(i=0;i<getNumObservations();i++){
-        writeElement(varIdx, i, (char*)datavec + i * getElementSize());
+    fmDbg << "FilteredMatrix.writeVariable(" << varIdx << ")" << endl;
+    double p = (double)getNumObservations()/nestedMatrix->getNumObservations();
+
+    if (p > WRITE_SPEED_PROPORTION) {
+        char *ptr = new char[getElementSize()*nestedMatrix->getNumObservations()];
+        // no filter
+        if (getNumObservations() != nestedMatrix->getNumObservations()) {
+            nestedMatrix->readVariable(this->filteredToRealRowIdx[varIdx], ptr);
+        }
+        for(i=0;i<getNumObservations();i++){
+            memcpy(&ptr[getElementSize()*this->filteredToRealColIdx[i]],&((char*)datavec)[getElementSize()*i],
+            getElementSize());
+        }
+
+        nestedMatrix->writeVariable(this->filteredToRealRowIdx[varIdx], ptr);
+        delete[] ptr;
+    }else {
+        for(i=0;i<getNumObservations();i++){
+            this->writeElement(varIdx, i, (char*)datavec + i * getElementSize());
+        }
     }
 }
 
 void FilteredMatrix::readElement(unsigned long varIdx, unsigned long obsIdx, void * out) {
-    deepDbg << "FilteredMatrix::readElement(" << varIdx << "," << obsIdx<<")";
-    getNestedMatrix().readElement(filteredToRealRowIdx[varIdx], filteredToRealColIdx[obsIdx], out);
+    fmDbg << "FilteredMatrix::readElement(" << varIdx << "," << obsIdx<<") = ";
+    nestedMatrix->readElement(filteredToRealRowIdx[varIdx], filteredToRealColIdx[obsIdx], out);
+    fmDbg << bufToString(getElementType(), (char*)out) << endl;
 }
 
 void FilteredMatrix::writeElement(unsigned long varIdx, unsigned long obsIdx, void* data) {
-    deepDbg << "FilteredMatrix.writeElement (" << varIdx << "," << obsIdx << ")" << endl;
-    getNestedMatrix().writeElement(filteredToRealRowIdx[varIdx], filteredToRealColIdx[obsIdx], data);
+    fmDbg << "FilteredMatrix.writeElement (" << varIdx << "," << obsIdx << ")" << endl;
+    nestedMatrix->writeElement(filteredToRealRowIdx[varIdx], filteredToRealColIdx[obsIdx], data);
 }
 
 unsigned long FilteredMatrix::getNumVariables() {
@@ -111,37 +110,25 @@ unsigned long FilteredMatrix::getNumObservations() {
 }
 
 void FilteredMatrix::saveAs(string newFilename) {
-    vector<unsigned long> recodedColIndexes;
-    vector<unsigned long> recodedRowIndexes;
 
-    map<unsigned long, unsigned long>::iterator i;
-
-    for(i=filteredToRealColIdx.begin(); i!=filteredToRealColIdx.end(); i++) {
-        recodedColIndexes.push_back(i->second);
-        recodedRowIndexes.push_back(i->second);
-    }
-
-    getNestedMatrix().saveAs(newFilename, recodedRowIndexes.size(), recodedColIndexes.size(), &recodedRowIndexes[0], &recodedColIndexes[0]);
+    nestedMatrix->saveAs(newFilename, this->filteredToRealRowIdx.size(),
+    this->filteredToRealColIdx.size(), &this->filteredToRealRowIdx[0], &this->filteredToRealColIdx[0]);
 }
 
 void FilteredMatrix::saveVariablesAs( string newFilename, unsigned long nvars, unsigned long * varIndexes) {
-    vector<unsigned long> recodedIndexes;
-    filterIdxList(varIndexes, nvars, recodedIndexes, filteredToRealRowIdx);
-    getNestedMatrix().saveVariablesAs( newFilename, nvars, &recodedIndexes[0]);
+    errorLog << "FilteredMatrix.saveVariableAs is not implemented." << errorExit; 
 }
 
 void FilteredMatrix::saveObservationsAs( string newFilename, unsigned long nobss, unsigned long * obsIndexes) {
-    vector<unsigned long> recodedIndexes;
-    filterIdxList(obsIndexes, nobss, recodedIndexes, filteredToRealColIdx);
-    getNestedMatrix().saveObservationsAs(newFilename, nobss, &recodedIndexes[0]);
+    errorLog << "FilteredMatrix.saveObservationsAs is not implemented." << errorExit;
 }
 
 void FilteredMatrix::saveAs(string newFilename, unsigned long nvars, unsigned long nobss, unsigned long *varIndexes, unsigned long *obsIndexes) {
     vector<unsigned long> recodedColIndexes;
     vector<unsigned long> recodedRowIndexes;
-    filterIdxList(varIndexes, nobss, recodedColIndexes, filteredToRealColIdx);
+    filterIdxList(obsIndexes, nobss, recodedColIndexes, filteredToRealColIdx);
     filterIdxList(varIndexes, nvars, recodedRowIndexes, filteredToRealRowIdx);
-    getNestedMatrix().saveAs(newFilename, nvars, nobss, &recodedRowIndexes[0], &recodedColIndexes[0]);
+    nestedMatrix->saveAs(newFilename, nvars, nobss, &recodedRowIndexes[0], &recodedColIndexes[0]);
 }
 
 void FilteredMatrix::saveAsText(string newFilename, unsigned long nvars, unsigned long nobss, unsigned long * varIndexes, unsigned long * obsIndexes) {
@@ -149,15 +136,15 @@ void FilteredMatrix::saveAsText(string newFilename, unsigned long nvars, unsigne
     vector<unsigned long> recodedRowIndexes;
     filterIdxList(obsIndexes, nobss, recodedColIndexes, filteredToRealColIdx);
     filterIdxList(varIndexes, nvars, recodedRowIndexes, filteredToRealRowIdx);
-    getNestedMatrix().saveAsText(newFilename, nvars, nobss, &recodedRowIndexes[0], &recodedColIndexes[0]);
+    nestedMatrix->saveAsText(newFilename, nvars, nobss, &recodedRowIndexes[0], &recodedColIndexes[0]);
 }
 
 short unsigned FilteredMatrix::getElementSize() {
-    return getNestedMatrix().getElementSize();
+    return nestedMatrix->getElementSize();
 }
 
 short unsigned FilteredMatrix::getElementType() {
-    return getNestedMatrix().getElementType();
+    return nestedMatrix->getElementType();
 }
 
 void FilteredMatrix::addVariable(void * invec, string varname) {
@@ -165,10 +152,14 @@ void FilteredMatrix::addVariable(void * invec, string varname) {
 }
 
 void FilteredMatrix::cacheAllNames(bool doCache) {
-    getNestedMatrix().cacheAllNames(doCache);
+    nestedMatrix->cacheAllNames(doCache);
 }
 
+AbstractMatrix* FilteredMatrix::castToAbstractMatrix(){
+    return this;
+}
 
-
-
+bool FilteredMatrix::setReadOnly(bool iReadOnly){
+    return nestedMatrix->setReadOnly(iReadOnly);
+}
 

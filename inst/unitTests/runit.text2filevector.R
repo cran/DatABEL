@@ -19,6 +19,10 @@ source(paste(path,"/shared_functions.R",sep=""))
 
 test.text2filevector <- function() 
 {
+#    library("RUnit")
+#    library("DatABEL")
+#    source("../inst/unitTests/shared_functions.R")
+
     unlink("test_matrix*")
     # create matrix
     data <- make_random_matrix(range_dim1 = c(5,20), range_dim2 = c(5,20))
@@ -35,8 +39,8 @@ test.text2filevector <- function()
     write(rownames(data),file="test_matrix.rownames")
     
 # generate identical data and check
-    text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames",R_matrix=TRUE) 
-    x <- databel_filtered_R("test_matrix_dimnames")
+    a <- text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames",R_matrix=TRUE) 
+    x <- databel("test_matrix_dimnames")
     tmp <- as(x,"matrix")
     #print(data)
     #print(tmp)
@@ -45,81 +49,81 @@ test.text2filevector <- function()
     
     text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames_T",
             R_matrix=TRUE,transpose=TRUE) 
-    x <- databel_filtered_R("test_matrix_dimnames_T")
+    x <- databel("test_matrix_dimnames_T")
     checkIdentical(t(data),as(x,"matrix"))
     
 # convert text two filevector format
     
     text2filevector(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames",
             colnames="test_matrix.colnames",rownames="test_matrix.rownames") 
-    x <- databel_filtered_R("test_matrix_NOnames")
+    x <- databel("test_matrix_NOnames")
     checkIdentical(data,as(x,"matrix"))
     
     text2filevector(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames_T",
             colnames="test_matrix.colnames",rownames="test_matrix.rownames",transpose=TRUE) 
-    x <- databel_filtered_R("test_matrix_NOnames_T")
+    x <- databel("test_matrix_NOnames_T")
     checkIdentical(t(data),as(x,"matrix"))
     
     text2filevector(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames_NOnames") 
-    x <- databel_filtered_R("test_matrix_NOnames_NOnames")
+    x <- databel("test_matrix_NOnames_NOnames")
     checkEqualsNumeric(data,as(x,"matrix"))
     
     text2filevector(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames_NOnames_T",transpose=TRUE) 
-    x <- databel_filtered_R("test_matrix_NOnames_NOnames_T")
+    x <- databel("test_matrix_NOnames_NOnames_T")
     checkEqualsNumeric(t(data),as(x,"matrix"))
     
     text2filevector(infile="test_matrix_rownames.dat",outfile="test_matrix_rownames",
             rownames=1,colnames="test_matrix.colnames") 
-    x <- databel_filtered_R("test_matrix_rownames")
+    x <- databel("test_matrix_rownames")
     checkIdentical(data,as(x,"matrix"))
     
     text2filevector(infile="test_matrix_rownames.dat",outfile="test_matrix_rownames_T",
             rownames=1,colnames="test_matrix.colnames",transpose=TRUE) 
-    x <- databel_filtered_R("test_matrix_rownames_T")
+    x <- databel("test_matrix_rownames_T")
     checkIdentical(t(data),as(x,"matrix"))
     
     text2filevector(infile="test_matrix_rownames.dat",outfile="test_matrix_rownames_NoColNames",
             rownames=1) 
-    x <- databel_filtered_R("test_matrix_rownames_NoColNames")
+    x <- databel("test_matrix_rownames_NoColNames")
     checkEqualsNumeric(data,as(x,"matrix"))
     
     text2filevector(infile="test_matrix_rownames.dat",outfile="test_matrix_rownames_NoColNames_T",
             rownames=1,transpose=TRUE) 
-    x <- databel_filtered_R("test_matrix_rownames_NoColNames_T")
+    x <- databel("test_matrix_rownames_NoColNames_T")
     checkEqualsNumeric(t(data),as(x,"matrix"))
     
     text2filevector(infile="test_matrix_colnames.dat",outfile="test_matrix_colnames",
             colnames=1,rownames="test_matrix.rownames") 
-    x <- databel_filtered_R("test_matrix_colnames")
+    x <- databel("test_matrix_colnames")
     checkIdentical(data,as(x,"matrix"))
     
     text2filevector(infile="test_matrix_colnames.dat",outfile="test_matrix_colnames_T",
             colnames=1,rownames="test_matrix.rownames",transpose=TRUE) 
-    x <- databel_filtered_R("test_matrix_colnames_T")
+    x <- databel("test_matrix_colnames_T")
     checkIdentical(t(data),as(x,"matrix"))
     
     text2filevector(infile="test_matrix_colnames.dat",outfile="test_matrix_colnames_NoRowNames",
             colnames=1) 
-    x <- databel_filtered_R("test_matrix_colnames_NoRowNames")
+    x <- databel("test_matrix_colnames_NoRowNames")
     checkEqualsNumeric(data,as(x,"matrix"))
     
     text2filevector(infile="test_matrix_colnames.dat",outfile="test_matrix_colnames_NoRowNames_T",
             colnames=1,transpose=TRUE) 
-    x <- databel_filtered_R("test_matrix_colnames_NoRowNames_T")
+    x <- databel("test_matrix_colnames_NoRowNames_T")
     checkEqualsNumeric(t(data),as(x,"matrix"))
     
     text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames",R_matrix=TRUE) 
-    x <- databel_filtered_R("test_matrix_dimnames")
+    x <- databel("test_matrix_dimnames")
     checkIdentical(data,as(x,"matrix"))
     
     text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames_T",
             R_matrix=TRUE,transpose=TRUE) 
-    x <- databel_filtered_R("test_matrix_dimnames_T")
+    x <- databel("test_matrix_dimnames_T")
     checkIdentical(t(data),as(x,"matrix"))
     
     text2filevector(infile="test_matrix_NOnames.dat",outfile="test_matrix_sub",
             skipcols=3,skiprows=2) 
-    x <- databel_filtered_R("test_matrix_sub")
+    x <- databel("test_matrix_sub")
     checkEqualsNumeric(data[c(3:dim(data)[1]),c(4:dim(data)[2])],as(x,"matrix"))
     
     # stupid extended matrix in non-R format
@@ -132,7 +136,7 @@ test.text2filevector <- function()
     
     text2filevector(infile="test_matrix_strange.dat",outfile="test_matrix_strange",
             colnames=2,rownames=3) 
-    x <- databel_filtered_R("test_matrix_strange")
+    x <- databel("test_matrix_strange")
     checkIdentical(data,as(x,"matrix"))
     
     unlink("test_matrix*")

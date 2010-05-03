@@ -9,7 +9,7 @@ library(DatABEL)
 
 filename <- "ERF.merlin.22.collected.ped.out.mldose"
 pt <- proc.time()
-x <- databel_base_R(filename,64)
+x <- databel(filename,64)
 proc.time()-pt
 
 pt <- proc.time()

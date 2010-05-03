@@ -6,80 +6,58 @@
 using namespace std;
 
 #include "AbstractMatrix.h"
-
-typedef map<unsigned long, unsigned long> IndexMap;
-
+/*
+* "Cols" are observations and "Rows" are variables  
+*/
 class FilteredMatrix : public AbstractMatrix {
     AbstractMatrix *nestedMatrix;
-    FilteredMatrix *nestedFilteredMatrix;
-    bool nestedMatrixIsFiltered;
-    
-    IndexMap filteredToRealColIdx;
-    IndexMap filteredToRealRowIdx;
 
-    void fillUpIndexMap(vector<unsigned long> &v, IndexMap &m, IndexMap &result );
+    vector<unsigned long> filteredToRealColIdx;
+    vector<unsigned long> filteredToRealRowIdx;
 
-    void filterIdxList(unsigned long *iIndexes, unsigned long numIndexes, vector<unsigned long> &oIndexes, map<unsigned long, unsigned long> &filterMap) {
-        oIndexes.reserve(filteredToRealColIdx.size());
+//    void fillUpIndexMap(vector<unsigned long> &v, IndexMap &m, IndexMap &result );
+
+    // takes iIndexes for input, filters using filterMap and outputs to oIndexes
+    void filterIdxList(unsigned long *iIndexes, unsigned long numIndexes,
+    vector<unsigned long> &oIndexes, vector<unsigned long> &filter) {
+        oIndexes.reserve(numIndexes);
 
         unsigned long i;
         for(i=0; i<numIndexes; i++) {
-            oIndexes.push_back(filterMap[iIndexes[i]]);
+            oIndexes.push_back(filter[iIndexes[i]]);
         }
     }
     
 public:
-    IndexMap &getFilteredToRealColMap() {
-        return filteredToRealColIdx;
-    }
-    IndexMap &getFilteredToRealRowMap() {
-        return filteredToRealRowIdx;
-    }
-
     // makes this matrix don't filter any cells
     void setNoFiltering(){
         unsigned long i;
-        filteredToRealRowIdx = IndexMap();
+        filteredToRealRowIdx.reserve(nestedMatrix->getNumVariables());
         for(i=0;i<nestedMatrix->getNumVariables();i++) {
-            filteredToRealRowIdx[i]=i;
+            filteredToRealRowIdx.push_back(i);
         }
 
-        filteredToRealColIdx = IndexMap();
+        filteredToRealColIdx.reserve(nestedMatrix->getNumObservations());
         for(i=0;i<nestedMatrix->getNumObservations();i++) {
-            filteredToRealColIdx[i]=i;
+            filteredToRealColIdx.push_back(i);
         }
     }
-
-    void setFilters(vector<unsigned long> &rowMask, vector<unsigned long> &colMask){
-        filteredToRealRowIdx = IndexMap();
-        filteredToRealColIdx = IndexMap();
-        if (nestedMatrixIsFiltered) {
-            fillUpIndexMap(rowMask,nestedFilteredMatrix->getFilteredToRealRowMap(),filteredToRealRowIdx);
-            fillUpIndexMap(colMask,nestedFilteredMatrix->getFilteredToRealColMap(),filteredToRealColIdx);
-        } else {
-            unsigned long realColIdx;
-            for (realColIdx=0; realColIdx<colMask.size(); realColIdx++) {
-                filteredToRealColIdx[realColIdx] = colMask[realColIdx];
-            }
-
-            unsigned long realRowIdx;
-            for (realRowIdx=0; realRowIdx<rowMask.size(); realRowIdx++) {
-                filteredToRealRowIdx[realRowIdx] = rowMask[realRowIdx];
-            }
-        }
+    // set filter for Filterematrix
+    void setFilteredArea(vector<unsigned long> &rowMask, vector<unsigned long> &colMask){
+        fmDbg << "setFilteredArea()" << endl;
+        this->filteredToRealRowIdx = vector<unsigned long>(rowMask);
+        this->filteredToRealColIdx = vector<unsigned long>(colMask);
     }
 
-    FilteredMatrix(AbstractMatrix &matrix) : nestedMatrix(&matrix), nestedMatrixIsFiltered (false) { }
-
-    FilteredMatrix(FilteredMatrix& fm ): nestedFilteredMatrix(&fm), nestedMatrixIsFiltered (true) { }
-
-    AbstractMatrix &getNestedMatrix() {
-        return nestedMatrixIsFiltered?nestedFilteredMatrix->getNestedMatrix():*nestedMatrix;
+    FilteredMatrix(AbstractMatrix &matrix) : nestedMatrix(&matrix) {
+        dbg << "Constructing FilteredMatrix from AbstractMatrix, ptr = " << (long)this << endl;
+        setNoFiltering();
     }
 
     unsigned long getNumVariables();
     unsigned long getNumObservations();
     void cacheAllNames(bool);
+    AbstractMatrix* getNestedMatrix() {return nestedMatrix;}
 
 	void saveAs(string newFilename);
 	void saveVariablesAs(string newFilename, unsigned long nvars, unsigned long * varindexes);
@@ -101,7 +79,9 @@ public:
 	void readElement(unsigned long varIdx, unsigned long obsIdx, void * elem);
 	void writeVariable(unsigned long varIdx, void * datavec);
 	void writeElement(unsigned long varIdx, unsigned long obsIdx, void * data);
-
+    virtual AbstractMatrix* castToAbstractMatrix();
+    virtual bool setReadOnly(bool readOnly);
+    
 private:
     void addVariable(void * invec, string varname);
 };

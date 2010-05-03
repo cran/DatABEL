@@ -1,24 +1,36 @@
 #include "Rstaff.h"
 
-// most be included after c++ headers!
+#include "FilteredMatrix.h"
+#include "Logger.h"
+
+// must be included after c++ headers!
 #include <stdio.h>
 #include <Rdefines.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+	void checkPointer(SEXP s) {
+		if (TYPEOF(s) != EXTPTRSXP) {
+			errorLog << "Pointer is not EXTPTRSXP" << endl << errorExit;
+		}
+		if (R_ExternalPtrTag(s) != install("AbstractMatrix") && R_ExternalPtrTag(s) != install("FilteredMatrix")) {
+			errorLog << "R_ExternalPtrTag(s) = " << (long)R_ExternalPtrTag(s) << endl;
+			errorLog << "Pointer is not AbstractMatrix nor FilteredMatrix" << endl << errorExit;
+		}
+	}
 
-	// Install the type tag
-	SEXP AbstractMatrix_init(void)
-	{
-		type_tag = install("AbstractMatrix");
-		return R_NilValue;
+	AbstractMatrix *getAbstractMatrixFromSEXP(SEXP s){
+		checkPointer(s);
+		if (TYPEOF(s) == EXTPTRSXP) {
+			return  ((AbstractMatrix*)R_ExternalPtrAddr(s))->castToAbstractMatrix();
+		}
+		errorLog << "External pointer not valid!" << endl << errorExit ;
 	}
 
 	SEXP get_nvars_R(SEXP s) {
-		CHECK_PTR(s);
-
-		AbstractMatrix * p = (AbstractMatrix*)R_ExternalPtrAddr(s);
+		//	    cout << "get_nvars_R()" << endl;
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
 
 		if (p == NULL) {
 			error_R("pointer is NULL\n");
@@ -45,9 +57,7 @@ extern "C" {
 	}
 
 	SEXP get_nobs_R(SEXP s) {
-		CHECK_PTR(s);
-
-		AbstractMatrix * p = (AbstractMatrix*)R_ExternalPtrAddr(s);
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
 
 		if (p == NULL) {
 			error_R("pointer is NULL\n");
@@ -73,17 +83,36 @@ extern "C" {
 		return out;
 	}
 
-	SEXP get_all_varnames_R(SEXP s) {
-		CHECK_PTR(s);
-
-		AbstractMatrix * p = (AbstractMatrix*)R_ExternalPtrAddr(s);
+	SEXP setReadOnly_R(SEXP s, SEXP readOnly) {
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
 
 		if (p == NULL) {
 			error_R("pointer is NULL\n");
 			return R_NilValue;
 		}
 
-		R_len_t nvars = (R_len_t) 0;
+		bool readonly = LOGICAL(readOnly)[0];
+
+		bool result = p->setReadOnly(readonly);
+
+		SEXP ret;
+		PROTECT(ret = allocVector(LGLSXP, 1));
+		LOGICAL(ret)[0] = result?TRUE:FALSE;
+		UNPROTECT(1);
+		return ret;
+	}
+
+	SEXP get_all_varnames_R(SEXP s) {
+		//	    testDbg << "get_all_varnames_R" << endl;
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
+
+		if (p == NULL) {
+			error_R("pointer is NULL\n");
+			return R_NilValue;
+		}
+
+		//R_len_t nvars = (R_len_t) 0;
+		unsigned long int nvars = 0;
 
 		try {
 			nvars = p->getNumVariables();
@@ -111,16 +140,16 @@ extern "C" {
 
 	// !!!
 	SEXP set_all_varnames_R(SEXP s, SEXP names) {
-		CHECK_PTR(s);
-
-		AbstractMatrix * p = (AbstractMatrix*)R_ExternalPtrAddr(s);
+		//   	    testDbg << "set_all_varnames_R"<<endl;
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
 
 		if (p == NULL) {
 			error_R("pointer is NULL\n");
 			return R_NilValue;
 		}
 
-		R_len_t nvars = (R_len_t) 0;
+//		R_len_t nvars = (R_len_t) 0;
+		unsigned long nvars = 0;
 
 		try {
 			nvars = p->getNumVariables();
@@ -132,7 +161,7 @@ extern "C" {
 		// check that length of SEXP names is the same!!!
 
 		for (unsigned long i = 0; i < nvars; i++) {
-			std::string varname = CHAR(STRING_ELT(names,i));
+			string varname = CHAR(STRING_ELT(names,i));
 			try {
 				p->writeVariableName(i,FixedChar(varname));
 			} catch (int errcode) {
@@ -141,28 +170,25 @@ extern "C" {
 			}
 		}
 
-		SEXP ret;PROTECT(ret = allocVector(LGLSXP, 1));LOGICAL(ret)[0] = TRUE;UNPROTECT(1);
+		SEXP ret;
+		PROTECT(ret = allocVector(LGLSXP, 1));
+		LOGICAL(ret)[0] = TRUE;
+		UNPROTECT(1);
 		return ret;
 
 	}
 
 	SEXP get_all_obsnames_R(SEXP s) {
-		/**
-		Rprintf("GONNA CHECK\n");
-		cout << TYPEOF(s) << endl;
-		cout << R_ExternalPtrTag(s) << endl;
-		cout << type_tag << endl;
-		**/
-		CHECK_PTR(s);
-
-		AbstractMatrix * p = (AbstractMatrix*)R_ExternalPtrAddr(s);
+		//testDbg << "get_all_obsnames_R"<<endl;
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
 
 		if (p == NULL) {
 			error_R("pointer is NULL\n");
 			return R_NilValue;
 		}
 
-		R_len_t nobss = (R_len_t) 0;
+		//R_len_t nobss = (R_len_t) 0;
+		unsigned long int nobss = 0;
 
 		try {
 			nobss = p->getNumObservations();
@@ -188,18 +214,18 @@ extern "C" {
 		return ret;
 	}
 
-	// !!!
-	SEXP set_all_obsnames_R(SEXP s, SEXP names) {
-		CHECK_PTR(s);
 
-		AbstractMatrix * p = (AbstractMatrix*)R_ExternalPtrAddr(s);
+	SEXP set_all_obsnames_R(SEXP s, SEXP names) {
+		//testDbg << "set_all_obsnames_R"<<endl;
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
 
 		if (p == NULL) {
 			error_R("pointer is NULL\n");
 			return R_NilValue;
 		}
 
-		R_len_t nobss = (R_len_t) 0;
+		//R_len_t nobss = (R_len_t) 0;
+		unsigned long int nobss = 0;
 
 		try {
 			nobss = p->getNumObservations();
@@ -211,7 +237,7 @@ extern "C" {
 		// check that length of SEXP names is the same!!!
 
 		for (unsigned long i = 0; i < nobss; i++) {
-			std::string obsname = CHAR(STRING_ELT(names,i));
+			string obsname = CHAR(STRING_ELT(names,i));
 			try {
 				p->writeObservationName(i,FixedChar(obsname));
 			} catch (int errcode) {
@@ -220,22 +246,22 @@ extern "C" {
 			}
 		}
 
-		SEXP ret;PROTECT(ret = allocVector(LGLSXP, 1));LOGICAL(ret)[0] = TRUE;UNPROTECT(1);
+		SEXP ret;
+		PROTECT(ret = allocVector(LGLSXP, 1));
+		LOGICAL(ret)[0] = TRUE;
+		UNPROTECT(1);
 		return ret;
 
 	}
 
 	static void AbstractMatrixRFinalizer(SEXP x) {
-		CHECK_PTR(x);
 		if (x == R_NilValue) return;
 		AbstractMatrix* p = (AbstractMatrix *) EXTPTR_PTR(x);
 		if (p == NULL) return;
-		//		p->freeResources();
-		Rprintf("finalizing AbstractMatrix: %p\n", p);
+		wrapperLog << "finalizing AbstractMatrix: " << (long)p << endl;  
 		delete p;
 	}
 
-	// !!!
 	SEXP disconnect_R(SEXP s) {
 		AbstractMatrixRFinalizer(s);
 		R_ClearExternalPtr(s);
@@ -243,7 +269,7 @@ extern "C" {
 	}
 
 	SEXP externalptr_is_null(SEXP s) {
-		CHECK_PTR(s);
+		checkPointer(s);
 		AbstractMatrix * p = (AbstractMatrix*)R_ExternalPtrAddr(s);
 		SEXP ret;
 		PROTECT(ret = allocVector(LGLSXP, 1));
@@ -253,9 +279,10 @@ extern "C" {
 		return ret;
 	}
 
-	SEXP open_FileMatrix_R(SEXP fname, SEXP cacheMb) {
+	SEXP open_FileMatrix_R(SEXP fname, SEXP cacheMb, SEXP ReadOnly) {
 		unsigned long cachesizeMb = (unsigned long) INTEGER(cacheMb)[0];
-		std::string filename = CHAR(STRING_ELT(fname,0));
+		bool readonly = LOGICAL(ReadOnly)[0];
+		string filename = CHAR(STRING_ELT(fname,0));
 		if (cachesizeMb<0) {
 			error_R("negative cache size\n");
 			return R_NilValue;
@@ -264,7 +291,8 @@ extern "C" {
 		AbstractMatrix* p = NULL;
 
 		try {
-			p = new FileVector(filename,cachesizeMb);
+			p = new FileVector(filename,cachesizeMb,readonly);
+			cout << "open_FileMatrix_R, ptr = " << (long)p << endl;
 		} catch (int errcode) {
 			return R_NilValue;
 		}
@@ -273,26 +301,26 @@ extern "C" {
 			error_R("pointer is NULL\n");
 			return R_NilValue;
 		}
-		SEXP val = R_MakeExternalPtr(p, type_tag, R_NilValue);
+		SEXP val = R_MakeExternalPtr(p, Rf_install("AbstractMatrix"), R_NilValue);
 		R_RegisterCFinalizerEx(val, AbstractMatrixRFinalizer, (Rboolean) TRUE);
 		return val;
 	}
 
-	SEXP read_variable_float_FileMatrix_R(SEXP nvar, SEXP s) {
-		CHECK_PTR(s);
-		AbstractMatrix * p = (AbstractMatrix*)R_ExternalPtrAddr(s);
+	SEXP read_variable_double_FileMatrix_R(SEXP nvar, SEXP s) {
+		//testDbg << "read_variable_float_FileMatrix_R"<<endl;
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
 		if (p == NULL) {
 			error_R("pointer is NULL\n");
 			return R_NilValue;
 		}
-		unsigned long nvariable = (unsigned long) INTEGER(nvar)[0];
+		unsigned long nvariable = (unsigned long) INTEGER(nvar)[0] - 1;
 		unsigned int nobs = 0;
 		try {
 			nobs = p->getNumObservations();
 		} catch (int errcode) {
 			return R_NilValue;
 		}
-		float * internal_data = new (std::nothrow) float [nobs];
+		double * internal_data = new (std::nothrow) double [nobs];
 
 		try {
 			p->readVariableAs(nvariable, internal_data);
@@ -302,22 +330,22 @@ extern "C" {
 
 		SEXP out;
 		PROTECT(out = allocVector(REALSXP, (R_len_t) p->getNumObservations()));
-		for (unsigned long i=0;i< nobs; i++) REAL(out)[i] = (double) internal_data[i];
-		UNPROTECT(1);
-
+		for (unsigned long i=0;i< nobs; i++) REAL(out)[i] = internal_data[i];
 		delete [] internal_data;
+
+		UNPROTECT(1);
 
 		return out;
 	}
 
 	SEXP write_variable_double_FileMatrix_R(SEXP nvar, SEXP data, SEXP s) {
-		CHECK_PTR(s);
-		AbstractMatrix * p = (AbstractMatrix*)R_ExternalPtrAddr(s);
+		//testDbg << "write_variable_double_FileMatrix_R"<<endl;
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
 		if (p == NULL) {
 			error_R("pointer is NULL\n");
 			return R_NilValue;
 		}
-		unsigned long nvariable = (unsigned long) INTEGER(nvar)[0];
+		unsigned long nvariable = (unsigned long) INTEGER(nvar)[0] - 1;
 		// here generally should be very careful -- what type of data is IN?
 
 		unsigned int nvars = 0;
@@ -348,13 +376,9 @@ extern "C" {
 		}
 
 		for (unsigned long i=0;i< nobss;i++) {
-			internal_data[i] = (double) REAL(data)[i];
+			internal_data[i] = REAL(data)[i];
 		}
 
-		//		Rprintf("\n%lu, %lu\n",nvariable,nobss);
-		//		for (unsigned long i=0;i< nobss;i++) {
-		//			Rprintf("%f ",internal_data[i]);
-		//		}
 		try {
 			p->writeVariableAs(nvariable, internal_data);
 		} catch (int errcode) {
@@ -366,16 +390,17 @@ extern "C" {
 		SEXP ret;
 		PROTECT(ret = allocVector(LGLSXP, 1));
 		LOGICAL(ret)[0] = TRUE;
-		UNPROTECT(1);
 		delete [] internal_data;
+
+		UNPROTECT(1);
 		return ret;
 	}
 
 	// !!!
 	SEXP set_cachesizeMb_R(SEXP s, SEXP SizeMB)
 	{
-		CHECK_PTR(s);
-		AbstractMatrix * p = (AbstractMatrix*)R_ExternalPtrAddr(s);
+		//testDbg << "set_cachesizeMb_R"<<endl;
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
 		if (p == NULL) {
 			error_R("pointer is NULL\n");
 			return R_NilValue;
@@ -395,8 +420,7 @@ extern "C" {
 
 	SEXP get_cachesizeMb_R(SEXP s)
 	{
-		CHECK_PTR(s);
-		AbstractMatrix * p = (AbstractMatrix*)R_ExternalPtrAddr(s);
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
 		if (p == NULL) {
 			error_R("pointer is NULL\n");
 			return R_NilValue;
@@ -417,15 +441,14 @@ extern "C" {
 		return(out);
 	}
 
-	// !!!
+
 	SEXP text2fvf_R(SEXP Fnames, SEXP IntPars)
 	{
-
-		std::string program_name = "text2fvf_R";
-		std::string infilename = CHAR(STRING_ELT(Fnames,0));
-		std::string outfilename = CHAR(STRING_ELT(Fnames,1));
-		std::string rownamesfilename = CHAR(STRING_ELT(Fnames,2));
-		std::string colnamesfilename = CHAR(STRING_ELT(Fnames,3));
+		string program_name = "text2fvf_R";
+		string infilename = CHAR(STRING_ELT(Fnames,0));
+		string outfilename = CHAR(STRING_ELT(Fnames,1));
+		string rownamesfilename = CHAR(STRING_ELT(Fnames,2));
+		string colnamesfilename = CHAR(STRING_ELT(Fnames,3));
 		unsigned long rownames = (unsigned long) INTEGER(IntPars)[0];
 		unsigned long colnames = (unsigned long) INTEGER(IntPars)[1];
 		unsigned long skiprows = (unsigned long) INTEGER(IntPars)[2];
@@ -446,10 +469,8 @@ extern "C" {
 			return R_NilValue;
 		}
 
-		//		Rprintf("well-finished in text2_float_fvf_R!\n");
 		SEXP ret;PROTECT(ret = allocVector(LGLSXP, 1));LOGICAL(ret)[0] = TRUE;UNPROTECT(1);
 		return ret;
-
 	}
 
 	SEXP ini_empty_FileMatrix_R(SEXP fname, SEXP nvars, SEXP nobs, SEXP Type)
@@ -464,7 +485,7 @@ extern "C" {
 
 		unsigned long numVariables = (unsigned long) INTEGER(nvars)[0];
 		unsigned long nobservations = (unsigned long) INTEGER(nobs)[0];
-		std::string filename = CHAR(STRING_ELT(fname,0));
+		string filename = CHAR(STRING_ELT(fname,0));
 		unsigned short int type = (unsigned short int) INTEGER(Type)[0];
 
 		if (type <=0 || type > 6) {
@@ -490,14 +511,14 @@ extern "C" {
 	//virtual void save(string newFilename, unsigned long nvars, unsigned long nobss, unsigned long * varindexes, unsigned long * obsindexes)
 	SEXP save_R(SEXP New_file_name, SEXP IntPars, SEXP s)
 	{
-		CHECK_PTR(s);
-		AbstractMatrix * p = (AbstractMatrix*)R_ExternalPtrAddr(s);
+		//   dbg<<"save_R"<<endl;
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
 		if (p == NULL) {
 			error_R("pointer is NULL\n");
 			return R_NilValue;
 		}
 
-		std::string newFilename = CHAR(STRING_ELT(New_file_name,0));
+		string newFilename = CHAR(STRING_ELT(New_file_name,0));
 		unsigned long nvars = (unsigned long) INTEGER(IntPars)[0];
 		unsigned long nobss = (unsigned long) INTEGER(IntPars)[1];
 		unsigned long * varindexes = new (std::nothrow) unsigned long [nvars];
@@ -514,8 +535,10 @@ extern "C" {
 
 		for (unsigned long i = 0; i < nvars; i++)
 			varindexes[i] = (unsigned long) INTEGER(IntPars)[i+2];
-		for (unsigned long i = 0; i < nobss; i++)
+		for (unsigned long i = 0; i < nobss; i++) {
 			obsindexes[i] = (unsigned long) INTEGER(IntPars)[i+2+nvars];
+			//cout << nobss << " " << i << "-" << obsindexes[i] << ";";
+		}
 
 		try {
 			p->saveAs(newFilename,nvars,nobss,varindexes,obsindexes);
@@ -529,9 +552,10 @@ extern "C" {
 		SEXP ret;
 		PROTECT(ret = allocVector(LGLSXP, 1));
 		LOGICAL(ret)[0] = TRUE;
-		UNPROTECT(1);
 		delete [] obsindexes;
 		delete [] varindexes;
+
+		UNPROTECT(1);
 		return ret;
 	}
 
@@ -539,16 +563,12 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-
-
 //
 // OLD STRANGE STAFF
 //
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
 
 	//        .Fortran("dqrls",
 	//                  qr = x, n = n, p = p,

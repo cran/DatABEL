@@ -1,9 +1,10 @@
-#' applies a function to 'databel_filtered_R' object
+#' applies a function to 'databel' object
 #' 
-#' An iterator applying a user-defined function to 
-#' databel_filtered_R - class object
+#' An iterator applying a user-defined function to
+#' an object of 'databel-class' 
+#' object
 #' 
-#' @param dfodata 'databel_filtered-R' object which is 
+#' @param dfodata 'databel' object which is 
 #' iterated over
 #' @param anFUN user-defined analysis function
 #' @param MAR which margin to iteracte over (default = 2, 
@@ -15,10 +16,10 @@
 #' (can process functions "lm", "glm", "coxph") and "process_simple_output"
 #' (process output from "sum", "prod", "sum_not_NA" [no. non-missing obs], 
 #' "sum_NA" [no. missing obs.])
-#' @param outclass output to ("matrix" or "databel_filtered_R")
-#' @param outfile if output class is "databel_filtered_R", the generated 
+#' @param outclass output to ("matrix" or "databel")
+#' @param outfile if output class is "databel", the generated 
 #' object is bond to the outfile
-#' @param type if output class is "databel_filtered_R", what data 
+#' @param type if output class is "databel", what data 
 #' tyoe to use for storage
 #' @param transpose whether to transpose the output
 #' @param ... arguments passed to the anFUN
@@ -27,25 +28,25 @@
 #' a <- matrix(rnorm(50),10,5)
 #' rownames(a) <- paste("id",1:10,sep="")
 #' colnames(a) <- paste("snp",1:5,sep="")
-#' b <- as(a,"databel_filtered_R")
+#' b <- as(a,"databel")
 #' apply(a,FUN="sum",MAR=2)
 #' apply2dfo(SNP,dfodata=b,anFUN="sum")
-#' tA <- apply2dfo(SNP,dfodata=b,anFUN="sum",outclass="databel_filtered_R",outfile="tmpA")
+#' tA <- apply2dfo(SNP,dfodata=b,anFUN="sum",outclass="databel",outfile="tmpA")
 #' tA
 #' as(tA,"matrix")
 #' apply2dfo(SNP,dfodata=b,anFUN="sum",transpose=FALSE)
-#' tB <- apply2dfo(SNP,dfodata=b,anFUN="sum",transpose=FALSE,outclass="databel_filtered_R",outfile="tmpB")
+#' tB <- apply2dfo(SNP,dfodata=b,anFUN="sum",transpose=FALSE,outclass="databel",outfile="tmpB")
 #' tB
 #' as(tB,"matrix")
 #' 
 #' sex <- 1*(runif(10)>.5)
 #' trait <- rnorm(10)+sex+as(b[,2],"vector")+as(b[,2],"vector")*sex*5
 #' apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm")
-#' tC <- apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",outclass="databel_filtered_R",outfile="tmpC")
+#' tC <- apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",outclass="databel",outfile="tmpC")
 #' tC
 #' as(tC,"matrix")
 #' apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",transpose=FALSE)
-#' tD <- apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",transpose=FALSE,outclass="databel_filtered_R",outfile="tmpD")
+#' tD <- apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",transpose=FALSE,outclass="databel",outfile="tmpD")
 #' tD
 #' as(tD,"matrix")
 #' 
@@ -64,7 +65,7 @@ apply2dfo <- function(..., dfodata,anFUN="lm",MAR=2,procFUN,
 	anFUN <- match.fun(anFUN)
 	
 	if (missing(dfodata)) stop("dfodata should be supplied")
-	if (class(dfodata) != "databel_filtered_R") stop("dfodata should be of calss databel_filtered_R")
+	if (class(dfodata) != "databel") stop("dfodata should be of calss databel")
 	
 	if (MAR == 1)
 		SNP <- as(dfodata[1,],"matrix")
@@ -89,17 +90,16 @@ apply2dfo <- function(..., dfodata,anFUN="lm",MAR=2,procFUN,
 			res <- matrix(ncol=dimout[2],nrow=(dimout[1])*(dim(dfodata)[MAR]))
 		else 
 			res <- matrix(nrow=dimout[2],ncol=(dimout[1])*(dim(dfodata)[MAR]))
-	} else if (outclass == "databel_filtered_R") 
+	} else if (outclass == "databel") 
 	{
-		if (missing(outfile)) stop("outfile argument must be provided with outcalss=='databel_filtered_R'")
+		if (missing(outfile)) stop("outfile argument must be provided with outcalss=='databel'")
 		# no good -- fast access in wrong direction
 		if (transpose)
-			res <- make_empty_fvf(outfile,nvar=dimout[2],nobs=(dimout[1])*(dim(dfodata)[MAR]),type=type)
+			res <- make_empty_fvf(outfile,nvar=dimout[2],nobs=(dimout[1])*(dim(dfodata)[MAR]),type=type, readonly=FALSE)
 		else 
-			res <- make_empty_fvf(outfile,nobs=dimout[2],nvar=(dimout[1])*(dim(dfodata)[MAR]),type=type)
-		#        res <- databel_filtered_R(ncol=dimout[2],nrow=(dimout[1])*(dim(dfodata)[MAR]))
+			res <- make_empty_fvf(outfile,nobs=dimout[2],nvar=(dimout[1])*(dim(dfodata)[MAR]),type=type, readonly=FALSE)
 	}
-	else stop("outclass must be 'matrix' or 'databel_filtered_R'")
+	else stop("outclass must be 'matrix' or 'databel'")
 #print(c("aaA",dim(res),class(res)))
 	
 	for (i in 1:dim(dfodata)[MAR]) 
@@ -126,8 +126,10 @@ apply2dfo <- function(..., dfodata,anFUN="lm",MAR=2,procFUN,
 	
 	if (transpose) {
 		if (!is.null(colnames(tmpout))) {
+			nms <- list(dimnames(res)[[1]],colnames(tmpout))
 			#print("i-go-go")
-			dimnames(res)[[2]] <- colnames(tmpout)
+			#print(nms)
+			dimnames(res) <- nms
 		}
 	} else {
 		if (dimout[1]==1) { 
@@ -137,13 +139,15 @@ apply2dfo <- function(..., dfodata,anFUN="lm",MAR=2,procFUN,
 			#print(dim(dfodata))
 			#print(dimnames(dfodata)[[2]])
 			if (!is.null(dimnames(dfodata)[[MAR]]))
-				dimnames(res)[[2]] <- dimnames(dfodata)[[MAR]]
+				dimnames(res) <- list(dimnames(res)[[1]],dimnames(dfodata)[[MAR]])
 		} else {
 			#print("a-ha-ha")
-			dimnames(res)[[2]] <- paste(as.vector(t(
-									matrix(rep(dimnames(dfodata)[[MAR]],dimout[1]),ncol=dimout[1])
-							)),
-					dimnames(tmpout)[[1]],sep="_")
+			dimnames(res) <- list(dimnames(res)[[1]],
+					paste(as.vector(t(
+											matrix(rep(dimnames(dfodata)[[MAR]],dimout[1]),ncol=dimout[1])
+									)),
+							dimnames(tmpout)[[1]],sep="_")
+			)
 		}
 	} 
 	#print("set dimnames[[2]]")
@@ -156,24 +160,34 @@ apply2dfo <- function(..., dfodata,anFUN="lm",MAR=2,procFUN,
 		#print(dimnames(dfodata)[[2]])
 		#print(dim(res))
 		if (dimout[1]==1) {
-			if (!is.null(dimnames(dfodata)[[MAR]]))
-				dimnames(res)[[1]] <- dimnames(dfodata)[[MAR]]
+			if (!is.null(dimnames(dfodata)[[MAR]])) {
+				nms <- list(dimnames(dfodata)[[MAR]],dimnames(res)[[2]])
+				#print("i-go-go-0")
+				#print(nms)
+				dimnames(res) <- nms
+			}
 		} else {
 			#print("there")
 			#print(dimnames(dfodata)[[2]])
 			#print(dimout[1])
 			#print(dimnames(tmpout)[[1]])
-			if (!is.null(dimnames(dfodata)[[MAR]]))
-				dimnames(res)[[1]] <- paste(as.vector(t(
-										matrix(rep(dimnames(dfodata)[[MAR]],dimout[1]),ncol=dimout[1])
-								)),
-						dimnames(tmpout)[[1]],sep="_")
+			if (!is.null(dimnames(dfodata)[[MAR]])) {
+				nms <- list(
+						paste(as.vector(t(
+												matrix(rep(dimnames(dfodata)[[MAR]],dimout[1]),ncol=dimout[1])
+										)),
+								dimnames(tmpout)[[1]],sep="_"),
+						dimnames(res)[[2]])
+				#print("i-go-go-1")
+				#print(nms)
+				dimnames(res) <- nms
+			}
 		}
 	} else {
 		if (!is.null(colnames(tmpout))) {
-			dimnames(res)[[1]] <- colnames(tmpout)
+			dimnames(res) <- list(colnames(tmpout),dimnames(res)[[2]])
 		}
 	}
-	#print("set dimnames[[1]]")
+#print("set dimnames[[1]]")
 	return(res)
 }

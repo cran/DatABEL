@@ -28,7 +28,7 @@
 #' a <- matrix(rnorm(50),10,5)
 #' rownames(a) <- paste("id",1:10,sep="")
 #' colnames(a) <- paste("snp",1:5,sep="")
-#' b <- as(a,"databel_filtered_R")
+#' b <- as(a,"databel")
 #' apply(a,FUN="sum",MAR=2)
 #' apply2dfo(SNP,dfodata=b,anFUN="sum",procFUN="process_simple_output")
 #' apply2dfo(SNP,dfodata=b,anFUN="sum",transpose=FALSE)

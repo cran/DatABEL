@@ -1,119 +1,19 @@
+
 #include "Rstaff.h"
-#include "iterator.h"
+#include "iterator_functions.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-	// Product function + wrapper
-	double prod(double *mydata, unsigned int size) {
-		double prodtotal = mydata[0];
-		for (register unsigned int i = 1; i < size; i++) {
-			prodtotal *= mydata[i];
-		}
-		return prodtotal;
-	}
-	void prodWrapper(double *indata, unsigned long int indataSize, double *outdata,
-			unsigned long int &outdataNcol, unsigned long int &outdataNrow,
-			unsigned int narg, double *argList) {
-		if (indata) {
-			outdata[0] = prod(indata, indataSize);
-		}
-		outdataNcol = 1;
-		outdataNrow = 1;
-	}
-
-	// Sum function + wrapper
-	double sum(double *mydata, unsigned int size) {
-		double sumtotal = 0.;
-		for (register unsigned int i = 0; i < size; i++) {
-			sumtotal += mydata[i];
-		}
-		return sumtotal;
-	}
-	void sumWrapper(double *indata, unsigned long int indataSize, double *outdata,
-			unsigned long int &outdataNcol, unsigned long int &outdataNrow,
-			unsigned int narg, double *argList) {
-		if (indata) {
-			outdata[0] = sum(indata, indataSize);
-		}
-		outdataNcol = 1;
-		outdataNrow = 1;
-	}
-
-	// Sum of powers function + wrapper
-	double sumpower(double *mydata, unsigned int size, int power) {
-		double sumpowertotal = 0.;
-		for (register unsigned int i = 0; i < size; i++) {
-			sumpowertotal += pow(mydata[i], power);
-		}
-		return sumpowertotal;
-	}
-	void sumpowerWrapper(double *indata, unsigned long int indataSize,
-			double *outdata, unsigned long int &outdataNcol,
-			unsigned long int &outdataNrow, unsigned int narg, double *argList) {
-		if (indata) {
-			int power = static_cast<int> (argList[0]);
-			outdata[0] = sumpower(indata, indataSize, power);
-		}
-		outdataNcol = 1;
-		outdataNrow = 1;
-	}
-
-	// databel_impute_prob_2_databel_mach_dose function + wrapper
-	void databel_impute_prob_2_databel_mach_dose(double *mydata, unsigned int size,
-			double *outdata, int power) {
-		unsigned int j = 0;
-		for (unsigned int obs = 0; obs < size; obs += 3) {
-			outdata[j++] = 2. * mydata[obs + 2] + mydata[obs + 1];
-		}
-	}
-	void databel_impute_prob_2_databel_mach_doseWrapper(double *indata,
-			unsigned long int indataSize, double *outdata,
-			unsigned long int &outdataNcol, unsigned long int &outdataNrow,
-			unsigned int narg, double *argList) {
-		if (indata) {
-			int power = static_cast<int> (argList[0]);
-			databel_impute_prob_2_databel_mach_dose(indata, indataSize, outdata, power);
-		}
-		outdataNcol = 1;
-		outdataNrow = indataSize / 3;
-	}
-
-	// databel_impute_prob_2_databel_mach_prob function + wrapper
-	void databel_impute_prob_2_databel_mach_prob(double *mydata, unsigned int size,
-			double *outdata) {
-		unsigned int j = 0;
-		for (unsigned int obs = 0; obs < size; obs += 3) {
-			outdata[j] = mydata[obs + 2];
-			outdata[(unsigned int) size/3 + j] = mydata[obs + 1]; // the two columns are put behind eachother
-			//cout << "j=" << j << "; (unsigned int) size/3 + j =" << (unsigned int) size/3 + j << endl;
-			//cout << "; value[j] =" << outdata[j] << "; value[...]=" << outdata[(unsigned int) size/3 + j] << endl;
-			j++;
-		}
-		//cout << "size=" << size << endl;
-		//cout << "end-j=" << j << endl;
-	}
-	void databel_impute_prob_2_databel_mach_probWrapper(double *indata,
-			unsigned long int indataSize, double *outdata,
-			unsigned long int &outdataNcol, unsigned long int &outdataNrow,
-			unsigned int narg, double *argList) {
-		if (indata) {
-			int power = static_cast<int> (argList[0]);
-			databel_impute_prob_2_databel_mach_prob(indata, indataSize, outdata);
-		}
-		outdataNcol = 2;
-		outdataNrow = indataSize / 3;
-	}
-
-	MethodConvStruct methodConverter[] = { { "sum", sumWrapper }, { "prod",
-			prodWrapper }, { "sumpower", sumpowerWrapper }, {
-					"databel_impute_prob_2_databel_mach_dose",
-					databel_impute_prob_2_databel_mach_doseWrapper }, {
-							"databel_impute_prob_2_databel_mach_prob",
-							databel_impute_prob_2_databel_mach_probWrapper } };
+	MethodConvStruct methodConverter[] =
+		{ { "sum", &sumWrapper },
+		  { "prod", &prodWrapper },
+		  { "sumpower", &sumpowerWrapper },
+		  {	"databel_impute_prob_2_databel_mach_dose", &databel_impute_prob_2_databel_mach_doseWrapper },
+		  {	"databel_impute_prob_2_databel_mach_prob", &databel_impute_prob_2_databel_mach_probWrapper }
+		};
 
 	bool getDataNew(AbstractMatrix *inData, double *outData, unsigned int datasize,
 			unsigned long int index, unsigned int margin) {
@@ -167,18 +67,18 @@ extern "C" {
 		}
 	}
 
+
 	SEXP iterator(SEXP data, SEXP nrids, SEXP nrobs, SEXP method, SEXP outputtype,
 			SEXP margin, SEXP nrarg, ...) {
 
 		// Check and get the data supplied
-		unsigned int nids, nobs;
+		unsigned long int nids, nobs;
 		bool newtype = true;
 		AbstractMatrix *pDataNew;
 		char const *pDataOld;
 
 		if (TYPEOF(data) == EXTPTRSXP) {
-			CHECK_PTR(data);
-			pDataNew = (AbstractMatrix*) R_ExternalPtrAddr(data);
+			pDataNew = getAbstractMatrixFromSEXP(data);
 			if (pDataNew == NULL) {
 				error_R("Pointer to data is NULL\n");
 				return R_NilValue;
@@ -260,7 +160,9 @@ extern "C" {
 		// Even when the output is put into a filevector, we still return an (empty) SEXP
 		SEXP out;
 		// Declare output filevector (whether we'll be using it or not)
-		AbstractMatrix * outFV;
+		FileVector* tmpFV = NULL;
+		FilteredMatrix* outFV = NULL;
+		//AbstractMatrix * outFV;
 		if (!fv) {
 			// Initialize output matrix once real number of rows is known
 			// ASSUMPTION: nrow_new remains constant over calls to function wrapper
@@ -275,13 +177,17 @@ extern "C" {
 			} catch (int errcode) {
 				error_R("Failed in iterator - call - initializeEmptyFile");
 				delete [] argList;
+				UNPROTECT(1);
 				return R_NilValue;
 			}
 			try {
-				outFV = new FileVector(outputName, 64);
+	   			tmpFV = new FileVector(outputName,64,false);
+	   			outFV = new FilteredMatrix(*tmpFV);
+				//outFV = new FileVector(outputName, 64, false);
 			} catch (int errcode) {
 				error_R("Cannot initialize output file\n");
 				delete [] argList;
+				UNPROTECT(1);
 				return R_NilValue;
 			}
 		}
@@ -290,6 +196,7 @@ extern "C" {
 		if (internal_data == NULL) {
 			error_R("can not allocate RAM for internal_data\n");
 			delete [] argList;
+			UNPROTECT(1);
 			return R_NilValue;
 		}
 		double * out_data = new (std::nothrow) double [nrow_new * ncol_multi];
@@ -297,6 +204,7 @@ extern "C" {
 			error_R("can not allocate RAM for out_data\n");
 			delete [] argList;
 			delete [] internal_data;
+			UNPROTECT(1);
 			return R_NilValue;
 		}
 
@@ -328,20 +236,23 @@ extern "C" {
 			}
 		}
 
-		UNPROTECT(1);
 		if (fv) {
+			//tmpFV.deInitialize();
+			delete tmpFV;
 			delete outFV;
 		}
 
 		delete [] argList;
 		delete [] internal_data;
 		delete [] out_data;
+
+		UNPROTECT(1);
 		return out;
 	}
 
 
 	/**
-
+	// OLD STUFF BELOW HERE:
 	// iterator and other staff
 	SEXP databel_impute_prob_2_databel_mach_dose(SEXP imputedata, SEXP OutFileName, SEXP CacheSizeMb)
 	{

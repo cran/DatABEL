@@ -1,4 +1,4 @@
-#' DatABEL package
+#' DatABEL package for fast consecutive access to large out-of-RAM stored matrices
 #' 
 #' A package interfacing FILEVECTOR C++ library 
 #' for storage of and fast consecutive access to 
@@ -8,11 +8,10 @@
 #' 
 #' @seealso 
 #' \code{\link{make_empty_fvf}},
-#' \code{\link{matrix2databel_base_R}},
-#' \code{\linkS4class{databel_base_R-class}},
-#' \code{\linkS4class{databel_filtered_R-class}}
+#' \code{\link{matrix2databel}},
+#' \code{\linkS4class{databel-class}}
 #' 
-#' @author Yurii Aulchenko
+#' @author Yurii Aulchenko (R code), Stepan Yakovenko & Andrey Chernyh (C++ code)
 #' 
 
 "DatABEL-package" <- function(){}

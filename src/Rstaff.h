@@ -6,28 +6,11 @@
 #include <R.h>
 
 
-//#include "const.h"
 #include "convert_util.h"
-////#include "convert_util.cpp"
 #include "AbstractMatrix.h"
-////#include "AbstractMatrix.cpp"
-//#include "FileVector.h"
-//#include "FileVector.cpp"
-//#include "frerror.h"
-////#include "frerror.cpp"
-//#include "frutil.h"
-////#include "frutil.cpp"
-//#include "frversion.h"
+#include "FilteredMatrix.h"
 #include "Transposer.h"
-////#include "Transposer.cpp"
-//#include "Logger.h" //9096728933
-////#include "Logger.cpp"
-//#include "CastUtils.h"
-////#include "CastUtils.cpp"
-
 #include "dautil.h"
-
-
 
 
 // maximal number of file-matrices allowed
@@ -37,21 +20,16 @@
 extern "C" {
 #endif
 
-	static SEXP type_tag = install("AbstractMatrix");
+	AbstractMatrix *getAbstractMatrixFromSEXP(SEXP s);
 
-	// macro to check if ptr valid
-#define CHECK_PTR(s) do { \
-		if (TYPEOF(s) != EXTPTRSXP || \
-				R_ExternalPtrTag(s) != type_tag) \
-				error("External pointer not valid!"); \
-} while (0)
+	//check if ptr valid
+    void checkPointer(SEXP s);
 
-	//SEXP AbstractMatrix_init(void);
 	typedef void (myfunctiontype)(double *, unsigned long int,
 			double *, unsigned long int &, unsigned long int &, unsigned int, double *);
 
-	typedef struct MethodConvStruct {
-		char *methodName;
+	struct MethodConvStruct {
+		const char *methodName;
 		myfunctiontype *functionPtr;
 	};
 
