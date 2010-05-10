@@ -26,6 +26,7 @@ extern "C" {
 			return  ((AbstractMatrix*)R_ExternalPtrAddr(s))->castToAbstractMatrix();
 		}
 		errorLog << "External pointer not valid!" << endl << errorExit ;
+		return NULL;
 	}
 
 	SEXP get_nvars_R(SEXP s) {

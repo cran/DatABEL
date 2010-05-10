@@ -18,8 +18,8 @@ FileHeader get_file_type(char * filename) {
 
 string extract_base_file_name(string filename)
 {
-    int idxExtPos = filename.find(FILEVECTOR_INDEX_FILE_SUFFIX);
-    int dataExtPos = filename.find(FILEVECTOR_DATA_FILE_SUFFIX);
+    unsigned int idxExtPos = filename.find(FILEVECTOR_INDEX_FILE_SUFFIX);
+    unsigned int dataExtPos = filename.find(FILEVECTOR_DATA_FILE_SUFFIX);
     if (idxExtPos == filename.size() - FILEVECTOR_INDEX_FILE_SUFFIX.size() )
     {
         return filename.substr(0, idxExtPos);
@@ -119,7 +119,7 @@ void initializeEmptyFile(string filename, unsigned long numVariables, unsigned l
 	unsigned long estimated_data_size = (unsigned long) fileHeader.bytesPerRecord *
 										(unsigned long) fileHeader.numVariables *
 										(unsigned long) fileHeader.numObservations;
-    unsigned long i;
+    //unsigned long i;
     dataFile.seekp(estimated_data_size-1,ios::beg);
     char c = 0;
   	dataFile.write(&c,1);

@@ -21,6 +21,9 @@ source(paste(path,"/mytest_iterator.R",sep=""))
 test.iterator <- function()
 {
 #	testmatr <- make_random_matrix()
+	
+	unlink("tmp*")
+	
     testmatr <- matrix(rnorm(10), 2, 5)
     dfo <- as(testmatr, "databel")
 	
@@ -54,7 +57,9 @@ test.iterator <- function()
 	
 	# Test filevector output, TO DO!
 	res10 <- mytest_iterator(dfo, FUN="sum", OUT="filevector_test.prob", MAR=2)
-	system("rm filevector_test*")
+	
+	rm(res10);gc()
+	unlink("filevector_test*")
 	
 	# Test exceptions
     a <- rnorm(100)
@@ -62,5 +67,8 @@ test.iterator <- function()
 	checkException(mytest_iterator(dfo, FUN="prod", OUT="R", MAR=3))
     checkException(mytest_iterator(dfo, FUN="non_existent_function", OUT="R", MAR=2))
 	checkException(mytest_iterator(dfo, FUN="sumpower", OUT="R", MAR=2, POW="powpow"))
-    system("rm tmp*")
+
+	rm(list=ls());gc()
+	
+	unlink("tmp*")
 }

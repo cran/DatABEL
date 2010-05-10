@@ -18,7 +18,7 @@ extern "C" {
 					double *, unsigned long int &,
 					unsigned long int &, unsigned int , double *);
 	void databel_impute_prob_2_databel_mach_dose(double *, unsigned int ,
-				double *, int );
+				double *);
 	void databel_impute_prob_2_databel_mach_doseWrapper(double *,
 				unsigned long int , double *,
 				unsigned long int &, unsigned long int &,

@@ -34,19 +34,21 @@ test.as.databel <- function()
     testmatr <- make_random_matrix()
     test_fv <- as(testmatr,"databel")
     checkNumEq(testmatr,test_fv)
-    disconnect(test_fv);connect(test_fv)
+    disconnect(test_fv)
+    connect(test_fv)
     checkNumEq(testmatr,test_fv)
     
     test_fv <- matrix2databel(testmatr,file="tmp",type="DOUBLE")
     checkNumEq(testmatr,test_fv)
-    disconnect(test_fv);connect(test_fv)
+    disconnect(test_fv)
+    connect(test_fv)
     checkNumEq(testmatr,test_fv)
     
     # try to ini using the same name
-    print(system("ls -al"))
+    # print(system("ls -al"))
     checkException(test_fv <- matrix2databel(testmatr,file="tmp",type="DOUBLE"))
     
-    rm(test_vf);gc()
+    rm(test_fv);gc()
     unlink("tmp*")
     
     #define UNSIGNED_SHORT_INT 1
@@ -57,7 +59,7 @@ test.as.databel <- function()
     test_fv <- matrix2databel(testmatr,file="tmp",type="UNSIGNED_SHORT_INT")
     checkNumEq(testmatr,test_fv)
     
-    rm(test_vf,testmatr);gc()
+    rm(test_fv,testmatr);gc()
     unlink("tmp*")
     
     #define SHORT_INT          2
@@ -68,7 +70,7 @@ test.as.databel <- function()
     test_fv <- matrix2databel(testmatr,file="tmp",type="SHORT_INT")
     checkNumEq(testmatr,test_fv)
     
-    rm(test_vf,testmatr);gc()
+    rm(test_fv,testmatr);gc()
     unlink("tmp*")
     
     
@@ -80,7 +82,7 @@ test.as.databel <- function()
     test_fv <- matrix2databel(testmatr,file="tmp",type="UNSIGNED_INT")
     checkNumEq(testmatr,test_fv)
     
-    rm(test_vf,testmatr);gc()
+    rm(test_fv,testmatr);gc()
     unlink("tmp*")
     
     #define INT                4
@@ -91,15 +93,18 @@ test.as.databel <- function()
     test_fv <- matrix2databel(testmatr,file="tmp",type="INT")
     checkNumEq(testmatr,test_fv)
     
-    rm(test_vf,testmatr);gc()
+    rm(test_fv,testmatr);gc()
     unlink("tmp*")
     
     #define FLOAT              5
     testmatr <- make_random_matrix(range_data = c(-1e16,1e16), type="double")
+    test_fv <- as(testmatr,"databel")
+    checkNumEq(testmatr,test_fv)
+	
     test_fv <- matrix2databel(testmatr,file="tmp",type="FLOAT")
     checkNumEq(testmatr,test_fv)
     
-    rm(test_vf,testmatr);gc()
+    rm(test_fv,testmatr);gc()
     unlink("tmp*")
     
     #define DOUBLE             6
@@ -110,7 +115,9 @@ test.as.databel <- function()
     test_fv <- matrix2databel(testmatr,file="tmp",type="DOUBLE")
     checkNumEq(testmatr,test_fv)
     
-    rm(test_vf,testmatr);gc()
+    rm(test_fv,testmatr);gc()
+	rm(list=ls());gc()
+	
     unlink("tmp*")
     
 }
@@ -155,7 +162,9 @@ test.save_as <- function()
 #    print(sub_tm)
 #    print(as(dfa[subrows,subcols],"matrix"))
 #    print(as(sub_dfa,"matrix"))
-    checkNumEq(sub_tm,as(sub_dfa,"matrix"))    
+    checkNumEq(sub_tm,as(sub_dfa,"matrix"))
+	
+	rm(list=ls());gc()
     
     unlink("tmp*")
 }

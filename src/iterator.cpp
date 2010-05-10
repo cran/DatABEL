@@ -30,15 +30,16 @@ extern "C" {
 				outData[j] = dTmp;
 			}
 		}
+		return true;
 	}
 
 	void getDataOld(char const *inData, double *outData, unsigned int datasize,
 			unsigned int index, unsigned int margin) {
-		int i, j, iTmp;
+		int j, iTmp;
 		char str;
 		int msk[4] = { 192, 48, 12, 3 };
 		int ofs[4] = { 6, 4, 2, 0 };
-		int nbytes; // the length of a row
+		unsigned int nbytes; // the length of a row
 		if ((datasize % 4) == 0) {
 			nbytes = datasize / 4;
 		} else {
@@ -46,8 +47,8 @@ extern "C" {
 		}
 
 		if (margin == 1) { // row-wise
-			int offset = index * nbytes;
-			for (i = offset; i < offset + nbytes; i++) {
+			unsigned int offset = index * nbytes;
+			for (unsigned int i = offset; i < offset + nbytes; i++) {
 				str = inData[i];
 				for (j = 0; j < 4; j++) {
 					iTmp = str & msk[j];
@@ -58,7 +59,7 @@ extern "C" {
 		} else { // column-wise
 			int insloc = 0;
 			j = index % 4;
-			for (i = index; i < datasize * nbytes; i += nbytes, insloc++) {
+			for (unsigned int i = index; i < datasize * nbytes; i += nbytes, insloc++) {
 				str = inData[i];
 				iTmp = str & msk[j];
 				iTmp >>= ofs[j];
@@ -74,8 +75,8 @@ extern "C" {
 		// Check and get the data supplied
 		unsigned long int nids, nobs;
 		bool newtype = true;
-		AbstractMatrix *pDataNew;
-		char const *pDataOld;
+		AbstractMatrix *pDataNew = NULL;
+		char const *pDataOld = NULL;
 
 		if (TYPEOF(data) == EXTPTRSXP) {
 			pDataNew = getAbstractMatrixFromSEXP(data);

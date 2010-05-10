@@ -110,13 +110,13 @@ void text2fvf(string program_name, string infilename, string outfilename,
 	if (rownamesfilename=="" && (rncol>0) && !skipcols) {
 		errorLog << "\n\nPlease tell how many columns to skip when you provide the column containing row names!" << endl << endl << errorExit;
 	}
-	if (skipcols && (rncol > skipcols)) {
+	if (skipcols && (rncol > ((int) skipcols) ) ) {
 		errorLog << "rncol > skipcols" << errorExit;
 	}
 	if (colnamesfilename=="" && (cnrow>0) && !skiprows) {
 		errorLog << "\n\nPlease tell how many rows to skip when you provide the row containing column names!" << endl << endl << errorExit;
 	}
-	if (skiprows && (cnrow > skiprows)) {
+	if (skiprows && (cnrow > ((int) skiprows) ) ) {
 		errorLog << "cnrow > skiprows" << errorExit;
 	}
 
@@ -133,7 +133,7 @@ void text2fvf(string program_name, string infilename, string outfilename,
 	// reading column names from file
 	if (colnamesfilename != "")
 	{
-		cout << "Reading columns from "  << colnamesfilename << ": ";
+		msg << "Reading columns from "  << colnamesfilename << ": ";
 		ifstream colnamesfile(colnamesfilename.c_str());
 		string tmpstr;
 		if (!colnamesfile) {
@@ -186,18 +186,18 @@ void text2fvf(string program_name, string infilename, string outfilename,
 	unsigned long numLines = calcNumLines(infilename);
 	unsigned long numWords = calcNumWordsInFirstLine(infilename);
 
-	cout << "Number of lines in source file is " << numLines << endl;
-	cout << "Number of words in source file is " << numWords << endl;
+	msg << "Number of lines in source file is " << numLines << endl;
+	msg << "Number of words in source file is " << numWords << endl;
 
-	cout << "skiprows = " << skiprows << endl;
-	cout << "cnrow = " << cnrow << endl;
-	cout << "skipcols = " << skipcols << endl;
-	cout << "rncol = " << rncol << endl;
-	cout << "Rmatrix = " << Rmatrix << endl;
-	cout << "numWords = " << numWords << endl;
+	msg << "skiprows = " << skiprows << endl;
+	msg << "cnrow = " << cnrow << endl;
+	msg << "skipcols = " << skipcols << endl;
+	msg << "rncol = " << rncol << endl;
+	msg << "Rmatrix = " << Rmatrix << endl;
+	msg << "numWords = " << numWords << endl;
 
-	int numRows = numLines - skiprows;
-	int numColumns=123;
+	long int numRows = numLines - skiprows;
+	long int numColumns=123;
 
 	bool colNamesFilePresents = (colnamesfilename!="");
 	bool rowNamesFilePresents = (rownamesfilename!="");
@@ -224,7 +224,7 @@ void text2fvf(string program_name, string infilename, string outfilename,
 		tokenize(line, lineWords, " ");
 
 		// is this a column name line?
-		if (lineCnt == cnrow && !colNamesFilePresents)
+		if (lineCnt == ((unsigned long) cnrow) && !colNamesFilePresents)
 		{
 			unsigned long i;
 			// ignoring R-matrix flag for some reason
@@ -244,7 +244,7 @@ void text2fvf(string program_name, string infilename, string outfilename,
 		unsigned long colCnt = 0;
 		unsigned long i;
 		for (i=0; i<lineWords.size(); i++) {
-			if (i == (rncol-1) && !rowNamesFilePresents) {
+			if (i == ( (unsigned long) (rncol - 1) ) && !rowNamesFilePresents) {
 				extRowNames.push_back(lineWords[i]);
 				continue;
 			}
@@ -253,7 +253,7 @@ void text2fvf(string program_name, string infilename, string outfilename,
 				continue;
 			}
 
-			char buf[20] = "01234567";
+			//char buf[20] = "01234567";
 			//parseStringToArbType(lineWords[i], type, buf);
 			//out->writeElement(rowCnt-1, colCnt, buf);
 			parseStringToArbType(lineWords[i], type, &ArbTypeData[colCnt*element_size]);
@@ -268,13 +268,13 @@ void text2fvf(string program_name, string infilename, string outfilename,
 
 	delete [] ArbTypeData;
 
-	if (!colNamesFilePresents && cnrow < 0) for (unsigned long i=1;i<=numColumns;i++) {
-		char * tmpstr;
+	if (!colNamesFilePresents && cnrow < 0) for (long int i=1;i<=numColumns;i++) {
+		char * tmpstr = NULL;
 		sprintf(tmpstr,"%lu",i);
 		extColNames.push_back(tmpstr);
 	}
-	if (!rowNamesFilePresents && cnrow < 0) for (unsigned long i=1;i<=numRows;i++) {
-		char * tmpstr;
+	if (!rowNamesFilePresents && cnrow < 0) for (long int i=1;i<=numRows;i++) {
+		char * tmpstr = NULL;
 		sprintf(tmpstr,"%lu",i);
 		extRowNames.push_back(tmpstr);
 	}
@@ -291,7 +291,7 @@ void text2fvf(string program_name, string infilename, string outfilename,
 
 	if(!bTranspose)
 	{
-		cout << "Transposing " << outfilename << " => " << realOutFilename << "." << endl;
+		msg << "Transposing " << outfilename << " => " << realOutFilename << "." << endl;
 		Transposer tr;
 
 		tr.process(outfilename, realOutFilename, true);

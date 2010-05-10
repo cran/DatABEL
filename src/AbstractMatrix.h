@@ -20,7 +20,7 @@ public:
         char* tmp = new (nothrow) char [getNumObservations()*getElementSize()];
         if(!tmp)
             errorLog << "writeVariableAs allocation error" << errorExit;
-        for(int i = 0; i< getNumObservations();i++){
+        for(unsigned long int i = 0; i< getNumObservations();i++){
             performCast(&tmp[i*getElementSize()],outvec[i],getElementType());
         }
         writeVariable(varIdx, tmp);
@@ -33,7 +33,7 @@ public:
         char* tmp = new (nothrow) char [getNumObservations()*getElementSize()];
         if(!tmp)
             errorLog << "add_variable_as allocation error" << errorExit;
-        for(int i = 0; i< getNumObservations();i++){
+        for(unsigned long int i = 0; i< getNumObservations();i++){
             performCast(&tmp[i*getElementSize()],outvec[i],getElementType());
         }
         addVariable (tmp, varname);
@@ -45,7 +45,7 @@ public:
     {
        char * tmp = new (nothrow) char[getNumObservations()*getElementSize()];
        readVariable(varIdx, tmp);
-       for(int i = 0; i< getNumObservations();i++) {
+       for(unsigned long int i = 0; i< getNumObservations();i++) {
             performCast(outvec[i],&tmp[i*getElementSize()],getElementType());
        }
        delete[] tmp;

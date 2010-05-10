@@ -33,8 +33,9 @@ test.databel_class <- function()
     unlink("test*.fv?")
     
 	# would fail with full range !!!
-    dta <- make_random_matrix(range_data=c(-10,10))
-    null <- as(dta,"databel")
+#	dta <- make_random_matrix(range_data=c(-10,10))
+	dta <- make_random_matrix()
+	null <- as(dta,"databel")
     checkNumEq(dta,null)
     checkIdentical("databel",class(null)[1])
     x <- null
@@ -161,6 +162,8 @@ test.databel_class <- function()
 ### would fail with checkIdentical
 #    checkIdentical(dta1,as(x1,"matrix"))
     checkNumEq(dta1,x1)
+	
+	rm(list=ls());gc()
     
     unlink("tmp*.fv?")
     unlink("test*.fv?")

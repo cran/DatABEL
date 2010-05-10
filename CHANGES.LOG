@@ -1,0 +1,7 @@
+***** v. 0.1-2 (2010.05.10)
+
+fixes concerning the fact that Windows checks are not passed
+
+***** v. 0.1-0 (2010.05.04)
+
+switching to new DatABEL with single class

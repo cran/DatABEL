@@ -29,6 +29,7 @@ void FileVector::deInitialize(){
 	delete [] variableNames;
 	indexFile.close();
 	dataFile.close();
+	//Rprintf("deInitialize, closing files %s\n",filename.c_str());
 	AbstractMatrix::closeForWriting(filename);
 }
 
@@ -38,6 +39,7 @@ FileVector::~FileVector() {
 }
 
 void FileVector::initialize(unsigned long cachesizeMb) {
+	//Rprintf("initialize, open file %s\n",filename.c_str());
 	dbg << "Opening FileVector '" << filename.c_str() <<"'."<< endl;
 
 	if (!readOnly) {
@@ -109,7 +111,7 @@ void FileVector::initialize(unsigned long cachesizeMb) {
 	}
 
 	unsigned long indexSize = sizeof(fileHeader) + sizeof(FixedChar)*(fileHeader.numVariables+fileHeader.numObservations);
-	if(indexSize != index_filestatus.st_size) {
+	if(indexSize != (unsigned long) index_filestatus.st_size) {
 		errorLog << "Index file "<<indexFilename<<" size(" << (int) index_filestatus.st_size << ") differs from the expected(";
 		errorLog << indexSize <<")" << endl << errorExit;
 	}
@@ -121,7 +123,7 @@ void FileVector::initialize(unsigned long cachesizeMb) {
 			(unsigned long) fileHeader.numVariables *
 			(unsigned long) fileHeader.numObservations;
 
-	if (estimated_size != data_filestatus.st_size) {
+	if (estimated_size != (unsigned long) data_filestatus.st_size) {
 		errorLog << "Data file size (" << (int) data_filestatus.st_size;
 		errorLog << ") differs from the expected ("<<estimated_size<<")"<<endl<<" [";
 		errorLog << fileHeader.numVariables<<","<<fileHeader.numObservations<<"]" << endl;
@@ -204,7 +206,8 @@ void FileVector::update_cache(unsigned long from_var) {
 	if (current_cache_size_bytes <= max_buffer_size_bytes) {
 		dataFile.read((char*)char_buffer,current_cache_size_bytes);
 		if (!dataFile) {
-			errorLog << "Failed to read cache from file '"<< dataFilename <<"'\n" << errorExit;
+			errorLog << internal_from << " aa " << current_cache_size_bytes << " " << max_buffer_size_bytes << "\n";
+			errorLog << "Failed to read cache from file '"<< dataFilename <<"' (1)\n" << errorExit;
 		}
 	} else {
 		// cache size is bigger than what we can read in one go ... read in blocks
@@ -214,14 +217,14 @@ void FileVector::update_cache(unsigned long from_var) {
 			if (nbytes_togo > max_buffer_size_bytes) {
 				dataFile.read((char*)(char_buffer+nbytes_finished),max_buffer_size_bytes);
 				if (!dataFile) {
-					errorLog << "Failed to read cache from file '"<<dataFilename<<"'\n"<<errorExit;
+					errorLog << "Failed to read cache from file '"<<dataFilename<<"' (2)\n"<<errorExit;
 				}
 				nbytes_finished += max_buffer_size_bytes;
 				nbytes_togo -= max_buffer_size_bytes;
 			} else {
 				dataFile.read((char*)(char_buffer+nbytes_finished),nbytes_togo);
 				if (!dataFile) {
-					errorLog << "Failed to read cache from file '"<<dataFilename<<"'\n"<<errorExit;
+					errorLog << "Failed to read cache from file '"<<dataFilename<<"' (3)\n"<<errorExit;
 				}
 				nbytes_finished += nbytes_togo;
 				nbytes_togo -= nbytes_togo;
@@ -288,7 +291,7 @@ FixedChar FileVector::readVariableName(unsigned long varIdx) {
 
 	if (!variableNames) {
 		FixedChar ret;
-		indexFile.seekp(sizeof(fileHeader) + sizeof(FixedChar)*(varIdx+fileHeader.numObservations), ios::beg);
+		indexFile.seekg(sizeof(fileHeader) + sizeof(FixedChar)*(varIdx+fileHeader.numObservations), ios::beg);
 		indexFile.read((char*)&ret, sizeof(FixedChar));
 		return ret;
 	}
@@ -303,7 +306,7 @@ FixedChar FileVector::readObservationName(unsigned long obsIdx) {
 
 	if (!observationNames) {
 		FixedChar ret;
-		indexFile.seekp(sizeof(fileHeader) + sizeof(FixedChar)*(obsIdx), ios::beg);
+		indexFile.seekg(sizeof(fileHeader) + sizeof(FixedChar)*(obsIdx), ios::beg);
 		indexFile.read((char*)&ret, sizeof(FixedChar));
 		return ret;
 	}
@@ -330,7 +333,7 @@ void FileVector::readObservation(unsigned long obsIdx, void *outvec) {
 	if(!tmpdata)
 		errorLog << "readObservation: cannot allocate tmpdata" << errorExit;
 
-	for( int i = 0; i< getNumVariables(); i++)
+	for(unsigned long int i = 0; i< getNumVariables(); i++)
 	{
 		readVariable(i, tmpdata);
 		memcpy((char*)outvec+i*getElementSize(),tmpdata+getElementSize()*obsIdx,getElementSize());
@@ -342,7 +345,7 @@ void FileVector::writeObservation(unsigned long obsIdx, void * invec) {
 	if (readOnly) {
 		errorLog << "Trying to write to the readonly file." << errorExit;
 	}
-	for( int i = 0; i< getNumVariables(); i++)
+	for(unsigned long int i = 0; i< getNumVariables(); i++)
 	{
 		writeElement( i, obsIdx, (char*)invec+ i*getElementSize() );
 	}
@@ -495,7 +498,7 @@ void FileVector::saveObservationsAs( string newFilename, unsigned long nobss, un
 void FileVector::copyVariable(char* to, char* from, int n, unsigned long * indexes ) {
 	for ( int j=0 ; j<n ; j++ )	{
 		//copy only selected observations to out_variable  from in_variable
-		int read_offset = indexes[j]*getElementSize();
+		unsigned long int read_offset = indexes[j]*getElementSize();
 		if(read_offset + getElementSize() > getNumObservations() * getElementSize()) {
 			errorLog << "When saving selected observations: index in obsindexes(" <<indexes[j];
 			errorLog << ") is out of range, source obsIdx is " << getNumObservations()<< endl;

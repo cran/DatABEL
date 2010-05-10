@@ -79,10 +79,10 @@ unsigned long src_nobss, unsigned int data_size) {
   if(src_nvars % square_size > 0) var_pages++;
 
   ifstream * src_stream = new ifstream();
-  src_stream->open(src_data_file_name.c_str(),ifstream::in );
+  src_stream->open(src_data_file_name.c_str(),ios::in | ios::binary);
 
   ofstream * dest_stream = new ofstream;
-  dest_stream->open(dest_data_file_name.c_str(),ofstream::out );
+  dest_stream->open(dest_data_file_name.c_str(),ios::out | ios::binary);
 
   for( unsigned long i =0; i< var_pages;i++) {
       for( unsigned long j =0; j< obs_pages;j++) {
@@ -126,7 +126,7 @@ unsigned long var_start, unsigned long var_length , unsigned int  data_size, uns
 	for(unsigned long i=0; i<var_length ;i++) {
 	   //seek to the beginning of the next var
 	   unsigned long read_pos =   (var_start + i )* src_obs_length  + obs_start ;
-	   src_stream->seekg( read_pos * data_size );
+	   src_stream->seekg( read_pos * data_size , ios::beg );
 	   //read next var to input buffer
 	   src_stream->read( data_part + ( i * obs_length * data_size ), obs_length * data_size );
 	}
@@ -140,7 +140,7 @@ unsigned long var_start, unsigned long var_length , unsigned int  data_size, uns
 	for(unsigned long i=0; i<var_length ;i++) {
 	   //seek to the beginning of the next var
 	   unsigned long write_pos =   (var_start + i )* dest_obs_length  + obs_start ;
-	   dest_stream->seekp( write_pos * data_size );
+	   dest_stream->seekp( write_pos * data_size , ios::beg );
 	   //write next piece of var to file
 	   dest_stream->write( data_part_transposed + ( i * obs_length * data_size ), obs_length * data_size );
 	}

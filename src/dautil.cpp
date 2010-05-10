@@ -58,7 +58,7 @@ extern "C" {
 
 		SEXP ret;
 		PROTECT(ret = allocVector(STRSXP, (R_len_t) outstrings.size()));
-		for (int i = 0;i<outstrings.size();i++) SET_STRING_ELT(ret, i, mkChar(outstrings[i].c_str()));
+		for (unsigned long int i = 0;i<outstrings.size();i++) SET_STRING_ELT(ret, i, mkChar(outstrings[i].c_str()));
 		UNPROTECT(1);
 		return ret;
 	}

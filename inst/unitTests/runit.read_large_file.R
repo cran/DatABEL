@@ -1,9 +1,9 @@
 ### --- Test setup ---
 
 if(FALSE) {
-## Not really needed, but can be handy when writing tests
-library("RUnit")
-library("DatABEL")
+    ## Not really needed, but can be handy when writing tests
+    library("RUnit")
+    library("DatABEL")
 }
 #test.empty <- function(){}
 ### do not run
@@ -13,7 +13,6 @@ library("DatABEL")
 # common functions and data
 
 data_prefix = "big_data/ERF.merlin.22.collected.ped.out.mldose"
-fv_filename <- data_prefix 
 
 databel_large_file_reads <- function(fv_data)
 {
@@ -33,7 +32,7 @@ databel_large_file_reads <- function(fv_data)
     checkEquals(realdim,dim(fv_data))
     checkEquals(realdim[1]*realdim[2],length(fv_data))
     checkTrue(is.list(dimnames(fv_data)))
-    checkEquals(fv_filename,backingfilename(fv_data))
+    checkEquals(data_prefix,backingfilename(fv_data))
     checkTrue(is.list(get_dimnames(fv_data)))
     checkEquals(2,length(get_dimnames(fv_data)))
     checkTrue(is.integer(cachesizeMb(fv_data)))
@@ -47,17 +46,17 @@ databel_large_file_reads <- function(fv_data)
     # test read all    
     accumulated_obssum <- rep(0,dim(fv_data)[1])
     
-	gsize <- 1000
+    gsize <- 1000
     for (i in seq(1,dim(fv_data)[2],gsize)) {
-		eow <- min(dim(fv_data)[2],i+gsize-1)
-		dta <- as(fv_data[,i:eow],"matrix")
-		dimnames(dta) <- NULL
+        eow <- min(dim(fv_data)[2],i+gsize-1)
+        dta <- as(fv_data[,i:eow],"matrix")
+        dimnames(dta) <- NULL
         checkEquals(varsum[i:eow],apply(dta,FUN=sum,MAR=2),tolerance=5*sqrt(.Machine$double.eps))
-		cat("checked",eow,"out of",dim(fv_data)[2],"variables\n")
-		accumulated_obssum <- accumulated_obssum + apply(dta,FUN=sum,MAR=1)
+        cat("checked",eow,"out of",dim(fv_data)[2],"variables\n")
+        accumulated_obssum <- accumulated_obssum + apply(dta,FUN=sum,MAR=1)
     }
     checkEquals(obssum,as(accumulated_obssum,"vector"),tolerance=5*sqrt(.Machine$double.eps))
-
+    
     # as ...
     nCol <- round(runif(1,min=10,max=30))
     nRow <- round(runif(1,min=10,max=30))
@@ -77,6 +76,9 @@ databel_large_file_reads <- function(fv_data)
 test.databel_large_file_reads <- function()
 {
     
+    library("RUnit")
+    library("DatABEL")
+    
     ## try to read from non-existing file
     checkException(databel("no_such_file"))
     checkException(databel("no_such_file1",128))
@@ -85,12 +87,12 @@ test.databel_large_file_reads <- function()
     checkException(databel(TRUE))
     
     # cann I read from base file name, *.fvi, *fvd?
-    tmpname1 <- paste(fv_filename,".fvi",sep="")
+    tmpname1 <- paste(data_prefix,".fvi",sep="")
     print(tmpname1)
 #    if (file.exists(tmpname1)) {
 #        fv_data <- databel(tmpname1)
 #    }
-    tmpname2 <- paste(fv_filename,".fvd",sep="")
+    tmpname2 <- paste(data_prefix,".fvd",sep="")
     print(tmpname2)
 #    if (file.exists(tmpname2)) {
 #        fv_data <- databel(tmpname2)
@@ -100,7 +102,7 @@ test.databel_large_file_reads <- function()
         warning(paste("file",tmpname1,"is missing; stopping tests"))
         return(NULL)
     }
-    fv_data <- databel(fv_filename)
+    fv_data <- databel(data_prefix)
     
     # check if nothing works with disconnected
     disconnect(fv_data)
@@ -113,7 +115,7 @@ test.databel_large_file_reads <- function()
     
     # check that some properties are still there
     checkTrue(is.integer(cachesizeMb(fv_data)) && cachesizeMb(fv_data) > 0)
-    checkEquals(fv_filename,backingfilename(fv_data))
+    checkEquals(data_prefix,backingfilename(fv_data))
     
     connect(fv_data)
     checkTrue(is.null(connect(fv_data)))

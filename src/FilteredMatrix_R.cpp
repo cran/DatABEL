@@ -31,11 +31,11 @@ extern "C" {
         unsigned long i;
 
         vector<unsigned long> rowMask;
-        for(i=0;i<length(selectedRows);i++)
+        for(i=0;i<((unsigned long) length(selectedRows));i++)
             rowMask.push_back(INTEGER(selectedRows)[i]-1);
 
         vector<unsigned long> colMask;
-        for(i=0;i<length(selectedCols);i++)
+        for(i=0;i<((unsigned long) length(selectedCols));i++)
             colMask.push_back(INTEGER(selectedCols)[i]-1);
 
         checkPointer(filteredMatrixSEXP);
@@ -92,6 +92,12 @@ extern "C" {
 
     SEXP disconnectFiltered_R(SEXP s) {
    		FilteredMatrixRFinalizer(s);
+   		R_ClearExternalPtr(s);
+   		return R_NilValue;
+   	}
+
+    SEXP disconnectFilteredAndAbstract_R(SEXP s) {
+    	FilteredAndAbstractRFinalizer(s);
    		R_ClearExternalPtr(s);
    		return R_NilValue;
    	}

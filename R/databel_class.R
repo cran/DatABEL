@@ -467,7 +467,7 @@ setMethod(
 
 setGeneric(
 		name = "save_as",
-		def = function(x,rows,cols,file,type="databel",cachesizeMb=64,readonly=TRUE) {standardGeneric("save_as");}
+		def = function(x,rows,cols,file,cachesizeMb=64,readonly=TRUE) {standardGeneric("save_as");}
 );
 
 
@@ -548,7 +548,8 @@ setMethod(
 				warning("object is already disconnected")
 				return()
 			}
-			tmp <- .Call("disconnectFiltered_R",object@data,PACKAGE="DatABEL");
+			tmp <- .Call("disconnectFilteredAndAbstract_R",object@data,PACKAGE="DatABEL");
+			gc();
 		}
 );
 
