@@ -170,3 +170,30 @@ test.databel_class <- function()
     
 }
 
+test.databel_class_setReadOnly <- function()
+{
+	cat ("Running test.databel_class_setReadOnly\n");    
+	
+	unlink("tmp*.fv?")
+	unlink("test*.fv?")
+	
+	dta <- make_random_matrix()
+	dfo <- as(dta,"databel")
+	checkNumEq(dta,dfo)
+	
+	dfo[1,1] <- 11
+	checkEquals(11,as(dfo[1,1],"vector"))
+	setReadOnly(dfo) <- TRUE
+	checkException(dfo[1,1] <- 12)
+	checkEqualsNumeric(11,as(dfo[1,1],"vector"))
+	setReadOnly(dfo) <- FALSE
+	dfo[1,1] <- 12
+	checkEqualsNumeric(12,as(dfo[1,1],"vector"))
+	
+
+	rm(list=ls());gc()
+	
+	unlink("tmp*.fv?")
+	unlink("test*.fv?")
+	
+}

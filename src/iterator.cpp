@@ -239,8 +239,8 @@ extern "C" {
 
 		if (fv) {
 			//tmpFV.deInitialize();
-			delete tmpFV;
 			delete outFV;
+			delete tmpFV;
 		}
 
 		delete [] argList;

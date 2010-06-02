@@ -33,6 +33,7 @@ public:
     Logger &operator << (int x){ stringstream ss; string s; ss << x; ss >> s; sendString(s); return *this; }
     Logger &operator << (unsigned int x) { stringstream ss; string s; ss << x; ss >> s; sendString(s); return *this; }
     Logger &operator << (long x) { stringstream ss; string s; ss << x; ss >> s; sendString(s); return *this; }
+    Logger &operator << (void*x) { stringstream ss; string s; ss << x; ss >> s; sendString(s); return *this; }
     Logger &operator << (unsigned long x) { stringstream ss; string s; ss << x; ss >> s; sendString(s); return *this; }
     Logger &operator << (float x) { stringstream ss; string s; ss << x; ss >> s; sendString(s); return *this; }
     Logger &operator << (double x) { stringstream ss; string s; ss << x; ss >> s; sendString(s); return *this; }

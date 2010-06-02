@@ -50,7 +50,7 @@ public:
     }
 
     FilteredMatrix(AbstractMatrix &matrix) : nestedMatrix(&matrix) {
-        dbg << "Constructing FilteredMatrix from AbstractMatrix, ptr = " << (long)this << endl;
+        dbg << "Constructing FilteredMatrix from AbstractMatrix, ptr = " << (void *)this << endl;
         setNoFiltering();
     }
 

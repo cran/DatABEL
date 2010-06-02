@@ -44,7 +44,7 @@ rm(x)
 gc()
 
 # load object
-x <- databel("test.fvf",64,readonly=FALSE)
+x <- databel("test.fvf",64,readonly=TRUE)
 x
 table(abs(as(x,"matrix")-dta)>1e-7)
 testobject(dta,x)
@@ -57,7 +57,7 @@ testobject(dta,x,FUN=as.vector)
 
 # [<-    keeping class
 # fails here
-# setReadOnly(x) <- FALSE
+setReadOnly(x) <- FALSE
 x[2,] <- rnorm(ncol(x))+100
 x[,3] <- rnorm(nrow(x))+100
 class(x)

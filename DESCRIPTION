@@ -2,9 +2,9 @@ Package: DatABEL
 Type: Package
 Title: file-based access to large matrices stored on HDD in binary
         format
-Version: 0.1-2
-Date: 2010-05-10
-Author: Yurii Aulchenko
+Version: 0.1-4
+Date: 2010-06-02
+Author: Yurii Aulchenko, Stepan Yakovenko
 Maintainer: Yurii Aulchenko <i.aoultchenko@erasmusmc.nl>
 Depends: R (>= 2.4.0), methods
 Description: a package providing interface to C++ FILEVECTOR library
@@ -14,6 +14,6 @@ Description: a package providing interface to C++ FILEVECTOR library
         genome-wide association analyzes e.g. using GenABEL and
         ProbABEL
 License: GPL (>= 2)
-Packaged: 2010-05-11 15:57:24 UTC; yuriiaulchenko
+Packaged: 2010-06-04 06:03:46 UTC; yuriiaulchenko
 Repository: CRAN
-Date/Publication: 2010-05-11 18:43:18
+Date/Publication: 2010-06-04 08:40:42

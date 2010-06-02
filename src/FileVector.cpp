@@ -13,9 +13,6 @@ void FileVector::saveIndexFile() {
 	indexFile.seekp(sizeof(fileHeader), ios::beg);
 
 	if (observationNames && variableNames) {
-		//indexFile.write((char*)observationNames, sizeof(FixedChar)*fileHeader.numObservations);
-		//indexFile.seekp(sizeof(fileHeader)+sizeof(FixedChar)*fileHeader.numObservations, ios::beg);
-		//indexFile.write((char*)variableNames,sizeof(FixedChar)*fileHeader.numVariables);
 		blockWriteOrRead(indexFile,sizeof(FixedChar)*fileHeader.numObservations,(char*)observationNames,true);
 		indexFile.seekp(sizeof(fileHeader)+sizeof(FixedChar)*fileHeader.numObservations, ios::beg);
 		blockWriteOrRead(indexFile,sizeof(FixedChar)*fileHeader.numVariables,(char*)variableNames,true);
@@ -25,11 +22,13 @@ void FileVector::saveIndexFile() {
 void FileVector::deInitialize(){
 	saveIndexFile();
 	delete [] char_buffer;
+	char_buffer = 0;
 	delete [] observationNames;
+	observationNames = 0;
 	delete [] variableNames;
+	variableNames = 0;
 	indexFile.close();
 	dataFile.close();
-	//Rprintf("deInitialize, closing files %s\n",filename.c_str());
 	AbstractMatrix::closeForWriting(filename);
 }
 

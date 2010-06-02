@@ -1,3 +1,15 @@
+***** v. 0.1-4 (2010.06.02)
+
+setReadOnly working; "long long" changes
+
+***** v. 0.1-3 (2010.05.28)
+
+fixes concerning the fact that Windows-64 bits version not compiled
+
+fixes in filevector
+
+Many thanks to Pau Navarro for help in identification of the bug!
+
 ***** v. 0.1-2 (2010.05.10)
 
 fixes concerning the fact that Windows checks are not passed

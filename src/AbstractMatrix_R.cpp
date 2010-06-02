@@ -15,7 +15,7 @@ extern "C" {
 			errorLog << "Pointer is not EXTPTRSXP" << endl << errorExit;
 		}
 		if (R_ExternalPtrTag(s) != install("AbstractMatrix") && R_ExternalPtrTag(s) != install("FilteredMatrix")) {
-			errorLog << "R_ExternalPtrTag(s) = " << (long)R_ExternalPtrTag(s) << endl;
+			errorLog << "R_ExternalPtrTag(s) = " << (void*)R_ExternalPtrTag(s) << endl;
 			errorLog << "Pointer is not AbstractMatrix nor FilteredMatrix" << endl << errorExit;
 		}
 	}
@@ -123,7 +123,9 @@ extern "C" {
 
 		FixedChar tmp;
 		SEXP ret;
+		//cout << "get_all_varnames.nvars=" << nvars << endl;
 		PROTECT(ret = allocVector(STRSXP, (R_len_t) nvars));
+		//cout << "alloc done" << endl;
 
 		try {
 			for (unsigned long i = 0; i< nvars; i++) {
@@ -259,7 +261,7 @@ extern "C" {
 		if (x == R_NilValue) return;
 		AbstractMatrix* p = (AbstractMatrix *) EXTPTR_PTR(x);
 		if (p == NULL) return;
-		wrapperLog << "finalizing AbstractMatrix: " << (long)p << endl;  
+		wrapperLog << "finalizing AbstractMatrix: " << (void*)p << endl;  
 		delete p;
 	}
 
@@ -293,7 +295,7 @@ extern "C" {
 
 		try {
 			p = new FileVector(filename,cachesizeMb,readonly);
-			cout << "open_FileMatrix_R, ptr = " << (long)p << endl;
+			cout << "open_FileMatrix_R, ptr = " << (void*)p << endl;
 		} catch (int errcode) {
 			return R_NilValue;
 		}

@@ -12,7 +12,7 @@ extern "C" {
    		if (x == R_NilValue) return;
    		FilteredMatrix* p = (FilteredMatrix *) EXTPTR_PTR(x);
    		if (p == NULL) return;
-   		wrapperLog << "Finalizing FilteredMatrix: "<< (long)p << endl;
+   		wrapperLog << "Finalizing FilteredMatrix: "<< (void *)p << endl;
    		delete p;
    	}
 
@@ -21,10 +21,10 @@ extern "C" {
    		FilteredMatrix* p = (FilteredMatrix *) EXTPTR_PTR(x);
    		if (p == NULL) return;
    		AbstractMatrix *nestedMatrix = p->getNestedMatrix();
-   		wrapperLog << "Finalizing FilteredMatrix: "<< (long)p <<
-   		" and nested AbstractMatrix "<< (long)nestedMatrix << endl;
-   		delete nestedMatrix;
+   		wrapperLog << "Finalizing FilteredMatrix: "<< (void *)p <<
+   		" and nested AbstractMatrix "<< (void*)nestedMatrix << endl;
    		delete p;
+   		delete nestedMatrix;            
    	}
 
    	SEXP setFilteredArea_R(SEXP filteredMatrixSEXP, SEXP selectedRows, SEXP selectedCols) {
@@ -53,7 +53,7 @@ extern "C" {
 
 		try {
 			p = new FilteredMatrix(*abstractMatrix);
-			cout << "create_FilteredMatrixFromAbstractMatrix_R = " << (long)p << endl; 
+			cout << "create_FilteredMatrixFromAbstractMatrix_R = " << (void*)p << endl; 
 		} catch (int errcode) {
 			return R_NilValue;
 		}
@@ -76,7 +76,7 @@ extern "C" {
 
 		try {
 			p = new FilteredMatrix(*filteredMatrix);
-			cout << "create_FilteredMatrixFromFilteredMatrix_R = " << (long)p << endl; 
+			cout << "create_FilteredMatrixFromFilteredMatrix_R = " << (void*)p << endl; 
 		} catch (int errcode) {
 			return R_NilValue;
 		}

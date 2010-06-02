@@ -568,6 +568,7 @@ setMethod(
 			if (!connected) stop("databel setReadOnly: object is not connected")
 			res <- .Call("setReadOnly_R",x@data,as(value,"logical"),PACKAGE="DatABEL");
 			if (!res) stop(paste("databel setReadOnly: can not set ReadOnly flag to",as(value,"logical")))
+			return(x)
 		}
 );
 
