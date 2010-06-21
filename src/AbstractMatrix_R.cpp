@@ -341,6 +341,8 @@ extern "C" {
 		return out;
 	}
 
+	/// magic number 9007199254740993, minimum value when (float)(x+1) != x
+
 	SEXP write_variable_double_FileMatrix_R(SEXP nvar, SEXP data, SEXP s) {
 		//testDbg << "write_variable_double_FileMatrix_R"<<endl;
 		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
@@ -459,6 +461,7 @@ extern "C" {
 		int transpose = (int) INTEGER(IntPars)[4];
 		int Rmatrix = (int) INTEGER(IntPars)[5];
 		unsigned short Type = (unsigned short ) INTEGER(IntPars)[6];
+		string nanString = CHAR(STRING_ELT(Fnames,4));
 
 		try {
 			text2fvf(program_name,
@@ -466,7 +469,7 @@ extern "C" {
 					rownamesfilename, colnamesfilename,
 					rownames, colnames,
 					skiprows, skipcols,
-					transpose, Rmatrix, Type, false);
+					transpose, Rmatrix, Type, false, nanString);
 		} catch (int x) {
 			error_R("failed in text2fvf_R\n");
 			return R_NilValue;
@@ -540,7 +543,6 @@ extern "C" {
 			varindexes[i] = (unsigned long) INTEGER(IntPars)[i+2];
 		for (unsigned long i = 0; i < nobss; i++) {
 			obsindexes[i] = (unsigned long) INTEGER(IntPars)[i+2+nvars];
-			//cout << nobss << " " << i << "-" << obsindexes[i] << ";";
 		}
 
 		try {
@@ -560,6 +562,61 @@ extern "C" {
 
 		UNPROTECT(1);
 		return ret;
+	}
+
+	SEXP saveAsText(SEXP New_file_name, SEXP IntPars, SEXP s) 	{
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
+		if (p == NULL) {
+			error_R("pointer is NULL\n");
+			return R_NilValue;
+		}
+
+		string newFilename = CHAR(STRING_ELT(New_file_name,0));
+		unsigned long nvars = (unsigned long) INTEGER(IntPars)[0];
+		unsigned long nobss = (unsigned long) INTEGER(IntPars)[1];
+		unsigned long * varindexes = new (std::nothrow) unsigned long [nvars];
+		if (varindexes == NULL) {
+			error_R("pointer is NULL\n");
+			return R_NilValue;
+		}
+		unsigned long * obsindexes = new (std::nothrow) unsigned long [nobss];
+		if (obsindexes == NULL) {
+			error_R("pointer is NULL\n");
+			delete [] varindexes;
+			return R_NilValue;
+		}
+
+		for (unsigned long i = 0; i < nvars; i++)
+			varindexes[i] = (unsigned long) INTEGER(IntPars)[i+2];
+		for (unsigned long i = 0; i < nobss; i++) {
+			obsindexes[i] = (unsigned long) INTEGER(IntPars)[i+2+nvars];
+		}
+
+		try {
+		    cout << "here we are"<<endl;
+			p->saveAsText(newFilename,nvars,nobss,varindexes,obsindexes);
+		} catch (int errcode) {
+			error_R("can not save data to file %s\n",newFilename.c_str());
+			delete [] obsindexes;
+			delete [] varindexes;
+			return R_NilValue;
+		}
+
+		SEXP ret;
+		PROTECT(ret = allocVector(LGLSXP, 1));
+		LOGICAL(ret)[0] = TRUE;
+		delete [] obsindexes;
+		delete [] varindexes;
+
+		UNPROTECT(1);
+		return ret;
+	}
+
+	SEXP checkNumBits(){
+	    if (sizeof(unsigned long) != 8) {
+    		errorLog << "YOU APPEAR TO WORK ON 32-BIT SYSTEM. LARGE FILES ARE NOT SUPPORTED."<<endl;
+    	}
+	    return R_NilValue;
 	}
 
 

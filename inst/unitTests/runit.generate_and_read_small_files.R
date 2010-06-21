@@ -24,13 +24,13 @@ source(paste(path,"/shared_functions.R",sep=""))
 
 test.as.databel <- function()
 {
-    
 #    library("RUnit")
 #    library("DatABEL")
 #    source("shared_functions.R")
     
     unlink("tmp*")
-    
+
+
     testmatr <- make_random_matrix()
     test_fv <- as(testmatr,"databel")
     checkNumEq(testmatr,test_fv)
@@ -38,6 +38,7 @@ test.as.databel <- function()
     connect(test_fv)
     checkNumEq(testmatr,test_fv)
     
+
     test_fv <- matrix2databel(testmatr,file="tmp",type="DOUBLE")
     checkNumEq(testmatr,test_fv)
     disconnect(test_fv)
@@ -50,35 +51,37 @@ test.as.databel <- function()
     
     rm(test_fv);gc()
     unlink("tmp*")
-    
+
     #define UNSIGNED_SHORT_INT 1
-    testmatr <- make_random_matrix(range_data = c(0,255), type="integer")
+    testmatr <- make_random_matrix(range_data = c(0,65534), type="integer")
     test_fv <- as(testmatr,"databel")
     checkNumEq(testmatr,test_fv)
-    
+
     test_fv <- matrix2databel(testmatr,file="tmp",type="UNSIGNED_SHORT_INT")
     checkNumEq(testmatr,test_fv)
-    
+
     rm(test_fv,testmatr);gc()
     unlink("tmp*")
-    
+
     #define SHORT_INT          2
-    testmatr <- make_random_matrix(range_data = c(-127,127), type="integer")
+    testmatr <- make_random_matrix(range_data = c(-32000,32000), type="integer")
     test_fv <- as(testmatr,"databel")
     checkNumEq(testmatr,test_fv)
-    
+
     test_fv <- matrix2databel(testmatr,file="tmp",type="SHORT_INT")
     checkNumEq(testmatr,test_fv)
-    
-    rm(test_fv,testmatr);gc()
+
+    rm(test_fv,testmatr);
+    gc()
     unlink("tmp*")
     
-    
+
     #define UNSIGNED_INT       3
     testmatr <- make_random_matrix(range_data = c(0,100000), type="integer")
     test_fv <- as(testmatr,"databel")
     checkNumEq(testmatr,test_fv)
-    
+
+
     test_fv <- matrix2databel(testmatr,file="tmp",type="UNSIGNED_INT")
     checkNumEq(testmatr,test_fv)
     
@@ -119,11 +122,12 @@ test.as.databel <- function()
 	rm(list=ls());gc()
 	
     unlink("tmp*")
-    
 }
 
 test.save_as <- function()
 {
+
+    if (F){
 #    library("RUnit")
 #    library("DatABEL")
 #    source("shared_functions.R")
@@ -167,9 +171,6 @@ test.save_as <- function()
 	rm(list=ls());gc()
     
     unlink("tmp*")
+    }
 }
 
-test.write_databel <- function()
-{
-###
-}

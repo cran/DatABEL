@@ -45,10 +45,6 @@ void FileVector::initialize(unsigned long cachesizeMb) {
 		AbstractMatrix::checkOpenForWriting(filename);
 	}
 
-	if (sizeof(unsigned long) != 8) {
-		errorLog << "You appear to work on 32-bit system. Large files are not supported.\n";
-	}
-
 	indexFilename = extract_base_file_name(filename) + FILEVECTOR_INDEX_FILE_SUFFIX;
 	dataFilename = extract_base_file_name(filename) + FILEVECTOR_DATA_FILE_SUFFIX;
 
@@ -315,6 +311,7 @@ FixedChar FileVector::readObservationName(unsigned long obsIdx) {
 
 // can read single variable
 void FileVector::readVariable(unsigned long varIdx, void * outvec) {
+    dbg << "readVariable(varIdx = " << varIdx << ")"<< endl; 
 	if (varIdx>=fileHeader.numVariables) {
 		errorLog << "Variable number out of range (" << varIdx << " >= " << fileHeader.numVariables <<")"<<endl << errorExit;
 	}

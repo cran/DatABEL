@@ -3,7 +3,7 @@
 \title{converts text file to filevector format...}
 \usage{text2filevector(infile, outfile, colnames, rownames, skipcols,
     skiprows, transpose=FALSE, R_matrix=FALSE, type="DOUBLE",
-    cachesizeMb=64, readonly=TRUE)}
+    cachesizeMb=64, readonly=TRUE, naString="NA")}
 \description{converts text file to filevector format}
 \details{The file provides the data to be converted to filevector format.
 The file may provide the data only (no row and column names)
@@ -47,7 +47,8 @@ the format of R data matrix produced with
 "UNSIGNED_INT", "UNSIGNED_SHORT_INT", "SHORT_INT")}
 \item{cachesizeMb}{cache size for the resulting 'databel-class' object}
 \item{readonly}{whether the resulting 'databel-class' object should 
-be opened in readonly mode}}
+be opened in readonly mode}
+\item{naString}{the string used for missing data (default: NA)}}
 \examples{cat("this is an example which you can run if you can write to the file system\n")
 
 \dontrun{

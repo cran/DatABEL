@@ -65,8 +65,15 @@ extern "C" {
 	void databel_impute_prob_2_databel_mach_dose(double *mydata, unsigned int size,
 			double *outdata) {
 		unsigned int j = 0;
+		double zero = 0;
 		for (unsigned int obs = 0; obs < size; obs += 3) {
-			outdata[j++] = 2. * mydata[obs + 2] + mydata[obs + 1];
+			double edose = 2. * mydata[obs + 2] + mydata[obs + 1];
+			if ((edose + mydata[obs]) < 0.1) {
+				outdata[j] = 0/zero;
+			} else {
+				outdata[j] = edose;
+			}
+			j++;
 		}
 	}
 	void databel_impute_prob_2_databel_mach_doseWrapper(double *indata,
@@ -84,12 +91,18 @@ extern "C" {
 	// databel_impute_prob_2_databel_mach_prob function + wrapper
 	void databel_impute_prob_2_databel_mach_prob(double *mydata, unsigned int size,
 			double *outdata) {
+		double zero = 0;
 		unsigned int j = 0;
 		for (unsigned int obs = 0; obs < size; obs += 3) {
-			outdata[j] = mydata[obs + 2];
-			outdata[(unsigned int) size / 3 + j] = mydata[obs + 1]; // the two columns are put behind eachother
-			//cout << "j=" << j << "; (unsigned int) size/3 + j =" << (unsigned int) size/3 + j << endl;
-			//cout << "; value[j] =" << outdata[j] << "; value[...]=" << outdata[(unsigned int) size/3 + j] << endl;
+			if ((mydata[obs]+mydata[obs + 1]+mydata[obs + 2]) < 0.1) {
+				outdata[j] = 0/zero;
+				outdata[(unsigned int) size / 3 + j] = 0/zero;
+			} else {
+				outdata[j] = mydata[obs + 2];
+				outdata[(unsigned int) size / 3 + j] = mydata[obs + 1]; // the two columns are put behind eachother
+				//cout << "j=" << j << "; (unsigned int) size/3 + j =" << (unsigned int) size/3 + j << endl;
+				//cout << "; value[j] =" << outdata[j] << "; value[...]=" << outdata[(unsigned int) size/3 + j] << endl;
+			}
 			j++;
 		}
 		//cout << "size=" << size << endl;

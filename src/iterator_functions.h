@@ -5,6 +5,15 @@
 extern "C" {
 #endif
 
+	typedef void (myfunctiontype)(double *, unsigned long int,
+			double *, unsigned long int &, unsigned long int &, unsigned int, double *);
+
+	struct MethodConvStruct {
+		const char *methodName;
+		myfunctiontype *functionPtr;
+	};
+
+
 	double prod(double *, unsigned int );
 	void prodWrapper(double *, unsigned long int , double *,
 					unsigned long int &, unsigned long int &,

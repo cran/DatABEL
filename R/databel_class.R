@@ -67,16 +67,6 @@ setMethod(
 				stop(paste("databel initialize: cache size must be positive integer; now",cachesizeMb))
 			
 			if (is(baseobject,"character")){
-#				address <- .Call("open_FileMatrix_R",
-#						fname = baseobject, 
-#						csize = cachesizeMb,
-#						rof = readonly,
-#						PACKAGE="DatABEL"); 
-#				if (is(address,"null")) stop("databel initialize: can not create databel object at step 1, NULL pointer returned")
-#				.Object@basedataptr <- address
-#				address <-.Call("create_FilteredMatrixFromAbstractMatrix_R", 
-#						.Object@basedataptr, PACKAGE="DatABEL");
-#				if (is(address,"null")) stop("databel initialize: can not create databel object at step 2, NULL pointer returned")
 				address <- .Call("open_FilteredMatrix_R",
 						fname = baseobject, 
 						csize = cachesizeMb,
@@ -301,6 +291,14 @@ as.vector.databel <- function(x, ... )
 	return(as(x,"vector"))
 }
 
+as.double.databel <- function(x, ... ) 
+{
+	to <- as(x,"matrix")
+	return(as(to,"double"))
+}
+
+
+
 setAs("databel","vector",
 		function(from) {
 			to <- as(from,"matrix")
@@ -500,6 +498,39 @@ setMethod(
 			return(newobj)
 		}
 );
+
+setGeneric(
+		name = "save_as_text",
+		def = function(x,rows,cols,file,cachesizeMb=64,readonly=TRUE) {standardGeneric("save_as_text");}
+);
+
+
+setMethod(
+		f = "save_as_text",
+		signature = "databel",
+		definition = function(x,rows,cols,file,cachesizeMb=64,readonly=TRUE)
+		{
+			#allowd_types <- c("databel","text")
+			if (!is.character(file)) stop("databel save_as: file argument should be character")
+			if (!missing(rows)) {
+				newi <- convert_intlogcha_index_to_int(rows,x,1)
+			} else {
+				newi <- 1:dim(x)[1]
+			}
+			if (!missing(cols)) {
+				newj <- convert_intlogcha_index_to_int(cols,x,2)
+			} else {
+				newj <- 1:dim(x)[2]
+			}
+
+			intpar <- as.integer(c(length(newj),length(newi),(newj-1),(newi-1)))
+#			print(intpar)
+			if (!.Call("saveAsText",file,intpar,x@data))
+				stop("can not save_as_text(): saveAsText failed")
+			return(x)
+		}
+);
+
 
 setGeneric(
 		name = "connect",

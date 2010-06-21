@@ -9,8 +9,7 @@ using namespace std;
 #include "frutil.h"
 #include "CastUtils.h"
 
-class AbstractMatrix
-{
+class AbstractMatrix {
 public:
     virtual ~AbstractMatrix(){};
 

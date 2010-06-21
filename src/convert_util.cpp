@@ -13,8 +13,6 @@ using namespace std;
 
 #include "convert_util.h"
 
-// old version (246) works with DatABEL
-
 #define REPORT_EVERY 10000
 #include <iostream>
 #include <fstream>
@@ -41,7 +39,6 @@ unsigned long calcNumWordsInFirstLine(string fileName){
 	ifstream file(fileName.c_str());
 	vector<string> words;
 	string line;
-//	unsigned long numlines = 0;
 	getline(file, line);
 	tokenize(line, words);
 	return words.size();
@@ -50,7 +47,7 @@ unsigned long calcNumWordsInFirstLine(string fileName){
 void text2fvf(string program_name, string infilename, string outfilename,
 		string rownamesfilename, string colnamesfilename, int rncol, int cnrow,
 		unsigned long skiprows, unsigned long skipcols, int bTranspose, int Rmatrix,
-		unsigned short type, bool quiet) {
+		unsigned short type, bool quiet, string nanString) {
 
 	if (Rmatrix) {
 		skipcols = skiprows = 1;
@@ -95,7 +92,9 @@ void text2fvf(string program_name, string infilename, string outfilename,
 		msg << "\n";
 		msg << "\t --Rmatrix   = ";
 		messageOnOff(Rmatrix);
-		msg << "\n";
+		msg << endl;
+		msg << "\t --nanString = " << nanString;
+		msg << endl;
 	}
 
 	const string TMP_SUFFIX = "_fvtmp";
@@ -122,7 +121,7 @@ void text2fvf(string program_name, string infilename, string outfilename,
 
 	ifstream infile(infilename.c_str());
 	if (!infile) {
-	    errorLog << "Can not open file '" << infilename << "' for reading\n\n";
+	    errorLog << "Can not open file '" << infilename << "' for reading\n\n" << errorExit;
 	}
 
 	vector<string> extColNames;
@@ -253,11 +252,7 @@ void text2fvf(string program_name, string infilename, string outfilename,
 				continue;
 			}
 
-			//char buf[20] = "01234567";
-			//parseStringToArbType(lineWords[i], type, buf);
-			//out->writeElement(rowCnt-1, colCnt, buf);
-			parseStringToArbType(lineWords[i], type, &ArbTypeData[colCnt*element_size]);
-			//out->writeElement(rowCnt-1, colCnt, (char*)ArbTypeData+i*element_size);
+			parseStringToArbType(lineWords[i], type, &ArbTypeData[colCnt*element_size], nanString);
 			colCnt++;
 		}
 

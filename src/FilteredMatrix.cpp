@@ -110,17 +110,40 @@ unsigned long FilteredMatrix::getNumObservations() {
 }
 
 void FilteredMatrix::saveAs(string newFilename) {
-
     nestedMatrix->saveAs(newFilename, this->filteredToRealRowIdx.size(),
     this->filteredToRealColIdx.size(), &this->filteredToRealRowIdx[0], &this->filteredToRealColIdx[0]);
 }
 
-void FilteredMatrix::saveVariablesAs( string newFilename, unsigned long nvars, unsigned long * varIndexes) {
-    errorLog << "FilteredMatrix.saveVariableAs is not implemented." << errorExit; 
+void FilteredMatrix::saveVariablesAs( string newFilename, unsigned long nvars, unsigned long *varIndexes) {
+    vector<unsigned long> recodedColIndexes;
+    vector<unsigned long> recodedRowIndexes;
+
+    unsigned long *obsIndexes = new unsigned long[this->getNumObservations()];
+
+    unsigned long i;
+    for(i=0;i<this->getNumObservations();i++){
+        obsIndexes[i]=i;
+    }
+
+    filterIdxList(obsIndexes, this->getNumObservations(), recodedColIndexes, filteredToRealColIdx);
+    filterIdxList(varIndexes, nvars, recodedRowIndexes, filteredToRealRowIdx);
+    delete obsIndexes;
 }
 
 void FilteredMatrix::saveObservationsAs( string newFilename, unsigned long nobss, unsigned long * obsIndexes) {
-    errorLog << "FilteredMatrix.saveObservationsAs is not implemented." << errorExit;
+    vector<unsigned long> recodedColIndexes;
+    vector<unsigned long> recodedRowIndexes;
+
+    unsigned long *varIndexes = new unsigned long[this->getNumVariables()];
+
+    unsigned long i;
+    for(i=0;i<this->getNumObservations();i++){
+        varIndexes[i]=i;
+    }
+
+    filterIdxList(obsIndexes, nobss, recodedColIndexes, filteredToRealColIdx);
+    filterIdxList(varIndexes, getNumVariables(), recodedRowIndexes, filteredToRealRowIdx);
+    delete obsIndexes;
 }
 
 void FilteredMatrix::saveAs(string newFilename, unsigned long nvars, unsigned long nobss, unsigned long *varIndexes, unsigned long *obsIndexes) {

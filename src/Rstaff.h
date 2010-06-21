@@ -25,15 +25,6 @@ extern "C" {
 	//check if ptr valid
     void checkPointer(SEXP s);
 
-	typedef void (myfunctiontype)(double *, unsigned long int,
-			double *, unsigned long int &, unsigned long int &, unsigned int, double *);
-
-	struct MethodConvStruct {
-		const char *methodName;
-		myfunctiontype *functionPtr;
-	};
-
-
 #ifdef __cplusplus
 }
 #endif

@@ -15,9 +15,6 @@ class FilteredMatrix : public AbstractMatrix {
     vector<unsigned long> filteredToRealColIdx;
     vector<unsigned long> filteredToRealRowIdx;
 
-//    void fillUpIndexMap(vector<unsigned long> &v, IndexMap &m, IndexMap &result );
-
-    // takes iIndexes for input, filters using filterMap and outputs to oIndexes
     void filterIdxList(unsigned long *iIndexes, unsigned long numIndexes,
     vector<unsigned long> &oIndexes, vector<unsigned long> &filter) {
         oIndexes.reserve(numIndexes);

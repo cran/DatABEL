@@ -3,7 +3,7 @@
 set<string> AbstractMatrix::fileNamesOpenForWriting;
 
 void AbstractMatrix::checkOpenForWriting(const string fileName){
-    testDbg << "checkOpenForWriting("<< fileName << ")" << endl;
+    deepDbg << "checkOpenForWriting("<< fileName << ")" << endl;
     if (AbstractMatrix::fileNamesOpenForWriting.find(fileName) != fileNamesOpenForWriting.end()) {
         errorLog << "File " << fileName << " is already opened." <<  endl;
         throw 1;

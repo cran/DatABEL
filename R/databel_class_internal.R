@@ -20,7 +20,7 @@ databel_check <- function(x, reconnect = TRUE, stop_on_error = TRUE, quiet = FAL
 	
 	if (externalptr_is_null(x@data)) {
 		if (!reconnect) {
-			msg <- "databel_check: object is not connected (will not work for wrining, access is slower); use 'connect(object)'"
+			msg <- "databel_check: object is not connected (will not work for writing, access is slower); use 'connect(object)'"
 			if (stop_on_error) {
 				stop(msg);
 			} else {

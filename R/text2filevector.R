@@ -41,6 +41,7 @@
 #' @param cachesizeMb cache size for the resulting 'databel-class' object
 #' @param readonly whether the resulting 'databel-class' object should 
 #' be opened in readonly mode
+#' @param naString the string used for missing data (default: NA)
 #' 
 #' @author  Yurii Aulchenko
 #' 
@@ -118,7 +119,7 @@
 #' 
 
 text2filevector <- function(infile,outfile,colnames,rownames,skipcols,skiprows,
-		transpose=FALSE,R_matrix=FALSE,type="DOUBLE",cachesizeMb=64,readonly=TRUE)
+		transpose=FALSE,R_matrix=FALSE,type="DOUBLE",cachesizeMb=64,readonly=TRUE, naString="NA")
 {
 # text2fvf(c("./ERF3.impute.chr21.gen.geno","./ERF3.impute.chr21.gen.geno.fvfR","./test.colnames"),as.integer(c(2,1,1,5)))
 # text2fvf(c("ERF3.impute.chr21.gen.geno","ERF3.impute.chr21.gen.geno.fvfR","test.colnames"),as.integer(c(2,1,1,5)))
@@ -144,7 +145,7 @@ text2filevector <- function(infile,outfile,colnames,rownames,skipcols,skiprows,
 		{rncol <- 0; rnfile <- rownames} 
 		else 
 		{rncol <- as.integer(rownames); rnfile <- ""} 
-	}
+	}                                                                  
 	
 	if (R_matrix) cnrow <- rncol <- 1
 	if (rncol>0 && skipcols==0) skipcols <- rncol
@@ -152,7 +153,7 @@ text2filevector <- function(infile,outfile,colnames,rownames,skipcols,skiprows,
 	
 	intype <- filevector_type(type)
 	
-	charnames <- as.character(c(infile,outfile,rnfile,cnfile))
+	charnames <- as.character(c(infile,outfile,rnfile,cnfile, naString))
 	intnames <- as.integer(c(rncol,cnrow,skiprows,skipcols,transpose,R_matrix,intype))
 	#print(charnames)
 	#print(intnames)

@@ -69,6 +69,7 @@ extern "C" {
 	}
 
 
+	// ADD ARGUMENT 'STEP'???
 	SEXP iterator(SEXP data, SEXP nrids, SEXP nrobs, SEXP method, SEXP outputtype,
 			SEXP margin, SEXP nrarg, ...) {
 
@@ -91,6 +92,7 @@ extern "C" {
 			pDataOld = CHAR(data);
 			nids = INTEGER(nrids)[0];
 			nobs = INTEGER(nrobs)[0];
+		// ADD DEALING WITH REGULAR MATRICES HERE
 		} else {
 			error_R("Incorrect data type\n");
 			return R_NilValue;

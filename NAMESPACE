@@ -39,6 +39,7 @@ exportMethods(
 	"set_dimnames<-",
 #	"as.databel_base_R",
 	"save_as",
+	"save_as_text",
 	"setReadOnly<-"
 	)
 
@@ -46,4 +47,5 @@ exportMethods(
 #S3method(as.matrix,databel_base_R)
 #S3method(as.matrix,databel_filtered_R)
 #S3method(as.databel_base_R,matrix)
+S3method(as.double,databel)
 

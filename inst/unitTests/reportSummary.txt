@@ -1,9 +1,9 @@
-RUNIT TEST PROTOCOL -- Mon May 31 09:45:38 2010 
+RUNIT TEST PROTOCOL -- Tue Jun 22 01:00:39 2010 
 *********************************************** 
-Number of test functions: 10 
+Number of test functions: 12 
 Number of errors: 0 
 Number of failures: 0 
 
  
 1 Test Suite : 
-DatABEL unit testing - 10 test functions, 0 errors, 0 failures
+DatABEL unit testing - 12 test functions, 0 errors, 0 failures

@@ -16,6 +16,8 @@
 \alias{length,databel-method}
 \alias{save_as,databel-method}
 \alias{save_as}
+\alias{save_as_text,databel-method}
+\alias{save_as_text}
 \alias{backingfilename,databel-method}
 \alias{backingfilename}
 \alias{cachesizeMb,databel-method}
@@ -77,7 +79,8 @@ FILEVECTOR data are stored using files of form BASE.fvi (index) and BASE.fvd (da
     \item{dimnames<-}{\code{signature(x = "databel")}: sets row and column names }
     \item{set_dimnames<-}{\code{signature(x = "databel")}: sets row and column names (these could be non-unique) }
     \item{length}{\code{signature(x = "databel")}: returns number of elements in the matrix }
-    \item{save_as}{\code{signature(x = "databel")}: saves (a sub-set of) the object }   
+    \item{save_as}{\code{signature(x = "databel")}: saves (a sub-set of) the object as FV-file }   
+    \item{save_as_text}{\code{signature(x = "databel")}: saves (a sub-set of) the object as plain text file }   
     \item{backingfilename}{\code{signature(object = "databel")}: returns BASE FILEVECTOR file 
     name used to store the data}
     \item{cachesizeMb}{\code{signature(object = "databel")}: returns the cache size used}

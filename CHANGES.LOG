@@ -1,3 +1,13 @@
+***** v. 0.1-6 (2010.06.21)
+
+added NA for all data types
+
+added save_as_text method for databel class
+
+fix of NA treating in interated function affecting impute2databel/impute2mach of GenABEL
+
+added as("databel","double")
+
 ***** v. 0.1-4 (2010.06.02)
 
 setReadOnly working; "long long" changes

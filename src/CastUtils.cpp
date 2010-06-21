@@ -1,11 +1,27 @@
 #include <map>
 #include <string>
 #include <algorithm>
+#include <cmath>
 
 using namespace std;
 
 #include "frutil.h"
 #include "CastUtils.h"
+
+unsigned short int UNSIGNED_SHORT_INT_NAN;
+short int SHORT_INT_NAN;
+unsigned int UNSIGNED_INT_NAN;
+int INT_NAN;
+
+int initConsts(){
+  sscanf("32767","%hi",&SHORT_INT_NAN);
+  sscanf("65535","%hu",&UNSIGNED_SHORT_INT_NAN);
+  sscanf("2147483647","%i",&INT_NAN);
+  sscanf("4294967295","%u",&UNSIGNED_INT_NAN);
+}
+
+int dummy = initConsts();
+
 
 bool isNan_exact(string s){
 	transform(s.begin(), s.end(), s.begin(), ::tolower);
@@ -22,7 +38,7 @@ bool isNan_any(string s){
 	}
 }
 
-void parseStringToArbType(string s, int destType, void *destData) {
+void parseStringToArbType(string s, int destType, void *destData, string nanString) {
 
 	map<int, string> fmt;
 
@@ -35,20 +51,12 @@ void parseStringToArbType(string s, int destType, void *destData) {
 
 	string format = fmt[destType];
 
-	if (isNan_any(s)){
-		double zero = 0;
-		string zeroStr = "0"; // nan for integers
-		if (destType == DOUBLE ) {
-			*(double*)destData = 0/zero;
-		} else if (destType == FLOAT){
-			*(float*)destData = 0/zero;
-		} else {
-			sscanf(zeroStr.c_str(), format.c_str(), destData );
-		}
+	int result = sscanf(s.c_str(), format.c_str(), destData);
+
+	if (nanString == s || result !=1){
+	    setNan(destData, destType);
 		return;
 	}
-
-	sscanf(s.c_str(), format.c_str(), destData);
 }
 
 unsigned short int dataTypeFromString(string type){
@@ -96,3 +104,70 @@ string bufToString(short int dataType, char *data){
 
 	return string(ret);
 }
+
+void setNan(unsigned short int &i){setNan(&i, UNSIGNED_SHORT_INT);}
+void setNan(short int &i){setNan(&i, SHORT_INT);}
+void setNan(unsigned int &i){setNan(&i, UNSIGNED_INT);}
+void setNan(int &i){setNan(&i, INT);}
+void setNan(float &i){setNan(&i, FLOAT);}
+void setNan(double &i){setNan(&i, DOUBLE);}
+
+bool checkNan(unsigned short int i){return checkNan(&i, UNSIGNED_SHORT_INT);}
+bool checkNan(short int i){return checkNan(&i, SHORT_INT);}
+bool checkNan(unsigned int i){return checkNan(&i, UNSIGNED_INT);}
+bool checkNan(int i){return checkNan(&i, INT);}
+bool checkNan(float i){return checkNan(&i, FLOAT);}
+bool checkNan(double i){return checkNan(&i, DOUBLE);}
+
+void setNan(void *data, int dataType){
+    double dZero = 0.;
+    float fZero = 0.;
+    switch (dataType) {
+        case UNSIGNED_SHORT_INT:
+    	    (*(unsigned short int*) data) = UNSIGNED_SHORT_INT_NAN;
+    		break;
+    	case SHORT_INT:
+    	    (*(short int*) data) = SHORT_INT_NAN;
+    		break;
+    	case UNSIGNED_INT:
+    	    (*(unsigned int*) data) = UNSIGNED_INT_NAN;
+    		break;
+    	case INT:
+    	    (*(int*) data) = INT_NAN;
+    		break;
+    	case FLOAT:
+    	    (*(float*) data) = fZero/fZero;
+    		break;
+    	case DOUBLE:
+    	    (*(double*) data) = dZero/dZero;
+    		break;
+    	default:
+    		errorLog << "file contains data of unknown type" << endl << errorExit;
+   }
+}
+
+bool checkNan(void *data, int dataType){
+    switch (dataType) {
+        case UNSIGNED_SHORT_INT:
+    	    return (*(unsigned short int*) data) == UNSIGNED_SHORT_INT_NAN;
+    	case SHORT_INT:
+    	    return (*(short int*) data) == SHORT_INT_NAN;
+    	case UNSIGNED_INT:
+    	    return (*(unsigned int*) data) == UNSIGNED_INT_NAN;
+    	case INT:
+    	    return (*(int*) data) == INT_NAN;
+    	case FLOAT:
+    	    return isnan(*(float*) data);
+    	case DOUBLE:
+    	    return isnan(*(double*) data);
+    	default:
+    		errorLog << "file contains data of unknown type" << endl << errorExit;
+   }
+}
+
+int getDataType(unsigned short int){return UNSIGNED_SHORT_INT;}
+int getDataType(short int){return SHORT_INT;}
+int getDataType(unsigned int){return UNSIGNED_INT;}
+int getDataType(int){return INT;}
+int getDataType(float){return FLOAT;}
+int getDataType(double){return DOUBLE;}
