@@ -21,8 +21,8 @@ void FileVector::saveIndexFile() {
 
 void FileVector::deInitialize(){
 	saveIndexFile();
-	delete [] char_buffer;
-	char_buffer = 0;
+	delete [] cacheBuffer;
+	cacheBuffer = 0;
 	delete [] observationNames;
 	observationNames = 0;
 	delete [] variableNames;
@@ -129,7 +129,7 @@ void FileVector::initialize(unsigned long cachesizeMb) {
 	observationNames = 0;
 
 	setCacheSizeInMb(cachesizeMb);
-	update_cache(0);
+	updateCache(0);
 	dbg << "Filevector " << filename << " opened." << endl;
 }
 
@@ -172,60 +172,121 @@ void FileVector::setCacheSizeInMb( unsigned long cachesizeMb ) {
 	cache_size_bytes = cache_size_nvars*fileHeader.bytesPerRecord*fileHeader.numObservations*sizeof(char);
 
 	//free previously allocated memory
-	if(char_buffer !=0 )
-		delete char_buffer;
+	if(cacheBuffer !=0 )
+		delete []cacheBuffer;
 	// get memory for the cache
-	char_buffer = new (nothrow) char [cache_size_bytes];
-	if (!char_buffer)
+	cacheBuffer = new (nothrow) char [cache_size_bytes];
+	if (!cacheBuffer)
 		errorLog << "failed to get memory for cache" << endl << errorExit;
 	max_buffer_size_bytes = INT_MAX;
 
 	//don't read cache after resizing,
 	//it will be updated on next read operation from desired position
-	in_cache_from = 0;
-	in_cache_to = 0;
+	cacheBegin = 1;
+	cacheEnd = 0;
 }
 
-void FileVector::update_cache(unsigned long from_var) {
-	unsigned long current_cache_size_bytes = cache_size_bytes;
-	in_cache_from = from_var;
-	in_cache_to = from_var + cache_size_nvars - 1;
-	if (in_cache_to >= fileHeader.numVariables) {
-		in_cache_to = fileHeader.numVariables-1;
-		current_cache_size_bytes = (in_cache_to-in_cache_from+1)*
-				fileHeader.bytesPerRecord*fileHeader.numObservations*sizeof(char);
-	}
-	deepDbg << "Updating cache: " << in_cache_from << " - " << in_cache_to << "\n";
-	unsigned long internal_from = in_cache_from*fileHeader.numObservations*fileHeader.bytesPerRecord*sizeof(char);
-	dataFile.seekg(internal_from, ios::beg);
-	if (current_cache_size_bytes <= max_buffer_size_bytes) {
-		dataFile.read((char*)char_buffer,current_cache_size_bytes);
-		if (!dataFile) {
-			errorLog << internal_from << " aa " << current_cache_size_bytes << " " << max_buffer_size_bytes << "\n";
-			errorLog << "Failed to read cache from file '"<< dataFilename <<"' (1)\n" << errorExit;
-		}
-	} else {
-		// cache size is bigger than what we can read in one go ... read in blocks
-		unsigned long nbytes_togo = current_cache_size_bytes;
-		unsigned long nbytes_finished = 0;
-		while (nbytes_togo>0)
-			if (nbytes_togo > max_buffer_size_bytes) {
-				dataFile.read((char*)(char_buffer+nbytes_finished),max_buffer_size_bytes);
-				if (!dataFile) {
-					errorLog << "Failed to read cache from file '"<<dataFilename<<"' (2)\n"<<errorExit;
-				}
-				nbytes_finished += max_buffer_size_bytes;
-				nbytes_togo -= max_buffer_size_bytes;
-			} else {
-				dataFile.read((char*)(char_buffer+nbytes_finished),nbytes_togo);
-				if (!dataFile) {
-					errorLog << "Failed to read cache from file '"<<dataFilename<<"' (3)\n"<<errorExit;
-				}
-				nbytes_finished += nbytes_togo;
-				nbytes_togo -= nbytes_togo;
-			}
-	}
-	cached_data = char_buffer;
+void FileVector::calcCachePos(unsigned long newCenterPos, unsigned long &cacheBeginRef, unsigned long &cacheEndRef){
+    if (cache_size_nvars == getNumVariables()) {
+        cacheBeginRef = 0;
+        cacheEndRef = getNumVariables();
+        return;
+    }
+
+    cacheBeginRef = newCenterPos - cache_size_nvars/2;
+    cacheEndRef = cacheBeginRef + cache_size_nvars;
+
+    //cacheBeginRef < 0 ?
+    if (newCenterPos < cache_size_nvars/2) {
+        cacheBeginRef = 0;
+        cacheEndRef = cacheBeginRef + cache_size_nvars;
+        return;
+    }
+
+    if (cacheEndRef > getNumVariables()){
+        cacheEndRef = getNumVariables();
+        cacheBeginRef = cacheEndRef - cache_size_nvars;
+    }
+}
+
+void FileVector::updateCache(unsigned long varIdx) {
+    // first load ?
+    if (cacheEnd==0 && cacheBegin==1){
+        calcCachePos(varIdx, cacheBegin, cacheEnd);
+        dataFile.seekg(cacheBegin, ios::beg);
+        dbg << "First time cache load." << endl;
+        blockWriteOrRead(dataFile, cache_size_bytes, cacheBuffer, false);
+        if (!dataFile){
+            errorLog << "Inner error reading file."<< endl << errorExit;
+        }
+        return;
+    }
+
+    if (getNumObservations() == 0) {
+        return;
+    }
+
+    unsigned long currentCenter = (cacheEnd + cacheBegin) / 2;
+    unsigned long newCenter = varIdx;
+
+    unsigned long diffBetweenCenters;
+
+    if (currentCenter>newCenter){
+        diffBetweenCenters = currentCenter - newCenter;
+    } else {
+        diffBetweenCenters = newCenter - currentCenter;
+    }
+
+    if (diffBetweenCenters < cache_size_nvars/4 ){
+        // no need to update cache
+        return;
+    }
+
+    unsigned long newCacheBegin;
+    unsigned long newCacheEnd;
+
+    calcCachePos(newCenter, newCacheBegin, newCacheEnd);
+    
+    // update cache ?
+    if (newCacheBegin == cacheBegin) {
+        return;
+    }
+
+    unsigned long oldPos;
+    unsigned long newPos;
+    unsigned long loadPos;
+    unsigned long inMemLoadPos;
+    unsigned long hddReadSize;
+    unsigned long memMoveSize;
+
+    if (newCacheBegin > cacheBegin){
+        oldPos = newCacheBegin - cacheBegin;
+        newPos = 0;
+        loadPos = max(newCacheBegin, cacheEnd);
+        inMemLoadPos = max(newCacheBegin, cacheEnd) - newCacheBegin;
+        hddReadSize = min(newCacheBegin, cacheEnd ) - cacheBegin;
+    } else {
+        oldPos = 0;
+        newPos = cacheBegin - newCacheBegin;
+        loadPos = newCacheBegin;
+        inMemLoadPos = 0;
+        hddReadSize = min(newCacheEnd, cacheBegin) - newCacheBegin;
+    }
+
+    memMoveSize = cache_size_nvars - hddReadSize;
+
+    if (memMoveSize>0){
+        memmove(cacheBuffer + newPos * getElementSize() * getNumObservations(), cacheBuffer + oldPos * getElementSize() * getNumObservations(),  memMoveSize * getElementSize() * getNumObservations());    
+    }
+
+    dataFile.seekg(loadPos * getElementSize() * getNumObservations(), ios::beg);
+    blockWriteOrRead(dataFile, hddReadSize* getElementSize() * getNumObservations(), cacheBuffer+inMemLoadPos* getElementSize() * getNumObservations(), false);
+    if (!dataFile){
+        errorLog << "Inner error reading file."<< endl << errorExit;
+    }
+
+    cacheBegin = newCacheBegin;
+    cacheEnd = newCacheEnd;
 }
 
 void FileVector::setUpdateNamesOnWrite(bool bUpdate) {
@@ -311,17 +372,12 @@ FixedChar FileVector::readObservationName(unsigned long obsIdx) {
 
 // can read single variable
 void FileVector::readVariable(unsigned long varIdx, void * outvec) {
-    dbg << "readVariable(varIdx = " << varIdx << ")"<< endl; 
 	if (varIdx>=fileHeader.numVariables) {
 		errorLog << "Variable number out of range (" << varIdx << " >= " << fileHeader.numVariables <<")"<<endl << errorExit;
 	}
-	if (in_cache_to > 0 && varIdx >= in_cache_from && varIdx <= in_cache_to) {
-		unsigned long offset = (varIdx - in_cache_from)*fileHeader.numObservations*getElementSize();
-		memcpy(outvec,cached_data+offset,getElementSize()*(fileHeader.numObservations));
-	} else {
-		update_cache(varIdx);
-		memcpy(outvec,cached_data,getElementSize()*fileHeader.numObservations);
-	}
+	updateCache(varIdx);
+	unsigned long offset = (varIdx - cacheBegin)*fileHeader.numObservations*getElementSize();
+	memcpy(outvec,cacheBuffer+offset,getElementSize()*(fileHeader.numObservations));
 }
 
 void FileVector::readObservation(unsigned long obsIdx, void *outvec) {
@@ -341,8 +397,7 @@ void FileVector::writeObservation(unsigned long obsIdx, void * invec) {
 	if (readOnly) {
 		errorLog << "Trying to write to the readonly file." << errorExit;
 	}
-	for(unsigned long int i = 0; i< getNumVariables(); i++)
-	{
+	for(unsigned long int i = 0; i< getNumVariables(); i++)	{
 		writeElement( i, obsIdx, (char*)invec+ i*getElementSize() );
 	}
 }
@@ -360,10 +415,10 @@ void FileVector::writeVariable(unsigned long varIdx, void * datavec) {
 		errorLog <<"failed to write to data file\n"<<errorExit;
 	}
 
-	if (varIdx >= in_cache_from && varIdx <= in_cache_to)
+	if (varIdx >= cacheBegin && varIdx < cacheEnd)
 	{
-		unsigned long offset = (varIdx - in_cache_from)*fileHeader.numObservations*getElementSize();
-		memcpy(cached_data + offset,datavec,getElementSize()*fileHeader.numObservations);
+		unsigned long offset = (varIdx - cacheBegin)*fileHeader.numObservations*getElementSize();
+		memcpy(cacheBuffer + offset,datavec,getElementSize()*fileHeader.numObservations);
 	}
 }
 
@@ -396,9 +451,9 @@ void FileVector::writeElement(unsigned long varIdx, unsigned long obsIdx, void* 
 	dataFile.write((char*)data,getElementSize());
 	dataFile.flush();
 
-	if (varIdx >= in_cache_from && varIdx <= in_cache_to) {
-		unsigned long offset = (varIdx - in_cache_from)*fileHeader.numObservations*getElementSize() + obsIdx *getElementSize();
-		memcpy(cached_data+offset,data,getElementSize() );
+	if (varIdx >= cacheBegin && varIdx < cacheEnd) {
+		unsigned long offset = (varIdx - cacheBegin)*fileHeader.numObservations*getElementSize() + obsIdx *getElementSize();
+		memcpy(cacheBuffer+offset,data,getElementSize() );
 	}
 }
 
@@ -456,6 +511,11 @@ void FileVector::saveVariablesAs( string newFilename, unsigned long nvars, unsig
 
 	delete [] tmpvariable;
 }
+
+string FileVector::getFileName() {
+    return filename;
+}
+
 
 void FileVector::saveObservationsAs( string newFilename, unsigned long nobss, unsigned long *obsindexes) {
 	if (headerOrDataExists(newFilename))
@@ -537,50 +597,42 @@ void FileVector::saveAs(string newFilename, unsigned long nvars, unsigned long n
 	delete[] out_variable;
 }
 
-void FileVector::saveAsText(string newFilename, unsigned long nvars, unsigned long nobss,
-		unsigned long *varindexes, unsigned long *obsindexes) {
-
-	dbg << "nvars = " << nvars << endl;
-	dbg << "obsIdx = " << nobss << endl;
+void FileVector::saveAsText(string newFilename, bool saveVarNames, bool saveObsNames, string nanString) {
 
 	ofstream textfile(newFilename.c_str(), ios::out);
 
 	// copy observation names from the first object
-	for( unsigned long i=0 ; i < nobss ; i++ ) {
-		FixedChar fc = readObservationName( obsindexes[i] ) ;
-		textfile << fc.name << " ";
+	if (saveObsNames) {
+    	for( unsigned long i=0 ; i < getNumObservations() ; i++ ) {
+	    	FixedChar fc = readObservationName( i ) ;
+		    textfile << fc.name << " ";
+	    }
+
+	    textfile << endl;
 	}
-
-	textfile << endl;
-
-	char * out_variable = new (nothrow) char[nobss*getElementSize()];
-	if (!out_variable)
-		errorLog << "can not allocate memory for out_variable" << errorExit;
 
 	char * in_variable = new (nothrow) char[getNumObservations()*getElementSize()];
 	if (!in_variable)
 		errorLog << "can not allocate memory for in_variable" << endl << endl << errorExit;
 
-	for(unsigned long i=0; i<nvars; i++) {
-		dbg << "Writing var " << i << " of " << nvars << endl;
-		unsigned long selected_index = varindexes[i];
+	for(unsigned long i=0; i<getNumVariables(); i++) {
+		dbg << "Writing var " << i << " of " << getNumVariables()<< endl;
 		//write var names
-		FixedChar fc = readVariableName(selected_index);
-		textfile << fc.name << " ";
+		FixedChar fc = readVariableName(i);
+		if (saveVarNames) {
+		    textfile << fc.name << " ";
+		}
 		//write variables
-		readVariable(selected_index, in_variable);
-		copyVariable(out_variable, in_variable, nobss, obsindexes);
+		readVariable(i, in_variable);
 
-		for(unsigned long j=0; j<nobss; j++) {
-			double x;
-			performCast(x, &out_variable[j*getElementSize()],getElementType());
-			textfile << x << " ";
+		for(unsigned long j=0; j<getNumObservations(); j++) {
+		    string s  = bufToString(getElementType(),&in_variable[j*getElementSize()], nanString);
+			textfile << s << " ";
 		}
 		textfile << endl;
 	}
 
 	delete[] in_variable;
-	delete[] out_variable;
 }
 
 short unsigned FileVector::getElementSize() {
@@ -628,10 +680,10 @@ void FileVector::addVariable(void *invec, string varName) {
 	writeVariable(fileHeader.numVariables - 1, invec);
 }
 
-void FileVector::getPrivateCacheData(unsigned long* cacheSizeNVars, unsigned long *inCacheFrom, unsigned long *inCacheTo ) {
+void FileVector::getPrivateCacheData(unsigned long* cacheSizeNVars, unsigned long *pCacheBegin, unsigned long *pCacheEnd ) {
 	*cacheSizeNVars = cache_size_nvars;
-	*inCacheFrom = in_cache_from;
-	*inCacheTo = in_cache_to;
+	*pCacheBegin = cacheBegin;
+	*pCacheEnd = cacheEnd;
 }
 
 bool FileVector::setReadOnly(bool iReadOnly){

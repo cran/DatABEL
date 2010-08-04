@@ -27,7 +27,8 @@ test.apply2dfo <- function()
     unlink("tmp*")
 
 #	testmatr <- make_random_matrix(range_dim1=c(10,100),range_dim2=c(10,100),range_data = c(-10,10))
-	testmatr <- make_random_matrix()
+	testmatr <- make_matrix_of_type_with_NA(na.proportion=0)
+	testmatr[sample(1:length(testmatr),min(10,floor(length(testmatr)*0.01)))] <- NA
 	dfo <- as(testmatr,"databel")
 
     res0 <- apply(testmatr,MAR=2,FUN=sum)

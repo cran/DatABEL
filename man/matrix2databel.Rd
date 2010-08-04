@@ -13,5 +13,5 @@ in which case a temporary file name is created}
 \item{filename}{which FILEVECTOR BASE file name to use}
 \item{cachesizeMb}{cache size to be used when accessing the object}
 \item{type}{type of data to use for storage ("DOUBLE", "FLOAT", "INT", 
-"UNSIGNED_INT", "UNSIGNED_SHORT_INT", "SHORT_INT")}
+"UNSIGNED_INT", "UNSIGNED_SHORT_INT", "SHORT_INT", "CHAR", "UNSIGNED_CHAR")}
 \item{readonly}{whether to generate new 'databel' in read only mode}}

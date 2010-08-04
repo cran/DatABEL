@@ -103,8 +103,8 @@ unsigned long src_nobss, unsigned int data_size) {
           transpose_part(data_part,data_part_transposed,obs_length,var_length, data_size);
           write_part(dest_stream, data_part_transposed, i * square_size, var_length, j* square_size , obs_length,  data_size, src_nvars );
 
-          delete data_part;
-          delete data_part_transposed;
+          delete[] data_part;
+          delete[] data_part_transposed;
       }
       dbg << endl;
   }

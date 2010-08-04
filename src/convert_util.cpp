@@ -180,7 +180,7 @@ void text2fvf(string program_name, string infilename, string outfilename,
 	string firstLine;
 
 	vector<string> firstLineWords;
-	tokenize(firstLine, firstLineWords, " ");
+	tokenize(firstLine, firstLineWords);
 
 	unsigned long numLines = calcNumLines(infilename);
 	unsigned long numWords = calcNumWordsInFirstLine(infilename);
@@ -219,13 +219,13 @@ void text2fvf(string program_name, string infilename, string outfilename,
 	char* ArbTypeData = new (nothrow) char [(out->getNumObservations())*element_size];
 
 	while(getline(srcFile, line)) {
-		vector<string> lineWords;
-		tokenize(line, lineWords, " ");
 
 		// is this a column name line?
 		if (lineCnt == ((unsigned long) cnrow) && !colNamesFilePresents)
 		{
 			unsigned long i;
+            vector<string> lineWords;
+      		tokenize(line, lineWords);
 			// ignoring R-matrix flag for some reason
 			for(i=skipcols-Rmatrix; i<lineWords.size(); i++) {
 				extColNames.push_back(lineWords[i]);
@@ -241,20 +241,31 @@ void text2fvf(string program_name, string infilename, string outfilename,
 		}
 
 		unsigned long colCnt = 0;
-		unsigned long i;
-		for (i=0; i<lineWords.size(); i++) {
+		unsigned long i = 0;
+		char const *SEPARATORS = " \t";
+		char *lineBuf = strdup(line.c_str());
+		char *word = strtok(lineBuf, SEPARATORS);
+		while(word!=0) {
+
 			if (i == ( (unsigned long) (rncol - 1) ) && !rowNamesFilePresents) {
-				extRowNames.push_back(lineWords[i]);
+				extRowNames.push_back(word);
+				word = strtok(0, SEPARATORS);
+				i++;
 				continue;
 			}
 
 			if (i < skipcols) {
+			    word = strtok(0, SEPARATORS);
+			    i++;
 				continue;
 			}
 
-			parseStringToArbType(lineWords[i], type, &ArbTypeData[colCnt*element_size], nanString);
+    		parseStringToArbType(word, type, &ArbTypeData[colCnt*element_size], nanString);
 			colCnt++;
+			word = strtok(0, SEPARATORS);
+			i++;
 		}
+		free(lineBuf);
 
 		out->writeVariable(rowCnt-1, (char*)ArbTypeData);
 		rowCnt++;

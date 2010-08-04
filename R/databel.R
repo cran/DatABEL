@@ -20,5 +20,6 @@ databel <- function(baseobject,cachesizeMb=64,readonly=TRUE)
 #			cachesizeMb <- 64
 #		}
 #	}
-	return(new(Class="databel",baseobject=baseobject,cachesizeMb=cachesizeMb,readonly=readonly))
+    ret <- new(Class="databel",baseobject=baseobject,cachesizeMb=cachesizeMb,readonly=readonly);
+	return(ret)
 }

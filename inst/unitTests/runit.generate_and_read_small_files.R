@@ -27,11 +27,11 @@ test.as.databel <- function()
 #    library("RUnit")
 #    library("DatABEL")
 #    source("shared_functions.R")
-    
+
     unlink("tmp*")
 
 
-    testmatr <- make_random_matrix()
+    testmatr <- make_matrix_of_type_with_NA()
     test_fv <- as(testmatr,"databel")
     checkNumEq(testmatr,test_fv)
     disconnect(test_fv)
@@ -45,6 +45,7 @@ test.as.databel <- function()
     connect(test_fv)
     checkNumEq(testmatr,test_fv)
     
+
     # try to ini using the same name
     # print(system("ls -al"))
     checkException(test_fv <- matrix2databel(testmatr,file="tmp",type="DOUBLE"))
@@ -52,8 +53,10 @@ test.as.databel <- function()
     rm(test_fv);gc()
     unlink("tmp*")
 
+    print("A4");
+
     #define UNSIGNED_SHORT_INT 1
-    testmatr <- make_random_matrix(range_data = c(0,65534), type="integer")
+    testmatr <- make_matrix_of_type_with_NA("UNSIGNED_SHORT_INT")
     test_fv <- as(testmatr,"databel")
     checkNumEq(testmatr,test_fv)
 
@@ -63,9 +66,11 @@ test.as.databel <- function()
     rm(test_fv,testmatr);gc()
     unlink("tmp*")
 
+    print("A5");
+
     #define SHORT_INT          2
-    testmatr <- make_random_matrix(range_data = c(-32000,32000), type="integer")
-    test_fv <- as(testmatr,"databel")
+	testmatr <- make_matrix_of_type_with_NA("SHORT_INT")
+	test_fv <- as(testmatr,"databel")
     checkNumEq(testmatr,test_fv)
 
     test_fv <- matrix2databel(testmatr,file="tmp",type="SHORT_INT")
@@ -77,7 +82,7 @@ test.as.databel <- function()
     
 
     #define UNSIGNED_INT       3
-    testmatr <- make_random_matrix(range_data = c(0,100000), type="integer")
+    testmatr <- make_matrix_of_type_with_NA("UNSIGNED_INT")
     test_fv <- as(testmatr,"databel")
     checkNumEq(testmatr,test_fv)
 
@@ -87,9 +92,11 @@ test.as.databel <- function()
     
     rm(test_fv,testmatr);gc()
     unlink("tmp*")
-    
+
+    print("A7");
+
     #define INT                4
-    testmatr <- make_random_matrix(range_data = c(-100000,100000), type="integer")
+    testmatr <- make_matrix_of_type_with_NA("INT")
     test_fv <- as(testmatr,"databel")
     checkNumEq(testmatr,test_fv)
     
@@ -100,7 +107,7 @@ test.as.databel <- function()
     unlink("tmp*")
     
     #define FLOAT              5
-    testmatr <- make_random_matrix(range_data = c(-1e16,1e16), type="double")
+    testmatr <- make_matrix_of_type_with_NA("FLOAT")
     test_fv <- as(testmatr,"databel")
     checkNumEq(testmatr,test_fv)
 	
@@ -111,29 +118,45 @@ test.as.databel <- function()
     unlink("tmp*")
     
     #define DOUBLE             6
-    testmatr <- make_random_matrix(range_data = c(-1e16,1e16), type="double")
+    testmatr <- make_matrix_of_type_with_NA("DOUBLE")
     test_fv <- as(testmatr,"databel")
     checkNumEq(testmatr,test_fv)
 
     test_fv <- matrix2databel(testmatr,file="tmp",type="DOUBLE")
     checkNumEq(testmatr,test_fv)
-    
+    rm(test_fv);gc()
+    unlink("tmp*")
+
+    #define CHAR              7
+    testmatr <- make_matrix_of_type_with_NA("CHAR")
+    test_fv <- as(testmatr,"databel")
+    checkNumEq(testmatr,test_fv)
+
+    test_fv <- matrix2databel(testmatr,file="tmp",type="CHAR")
+    checkNumEq(testmatr,test_fv)
+    rm(test_fv);gc()
+    unlink("tmp*")
+
+    #define UNSIGNED_CHAR            8
+    testmatr <- make_matrix_of_type_with_NA("UNSIGNED_CHAR")
+    test_fv <- as(testmatr,"databel")
+    checkNumEq(testmatr,test_fv)
+
+
     rm(test_fv,testmatr);gc()
 	rm(list=ls());gc()
-	
     unlink("tmp*")
 }
 
 test.save_as <- function()
 {
 
-    if (F){
 #    library("RUnit")
 #    library("DatABEL")
 #    source("shared_functions.R")
 
     unlink("tmp*")
-    testmatr <- make_random_matrix(range_data=c(-10,10))
+    testmatr <- make_matrix_of_type_with_NA(range_data=c(-1000,1000))
 #    print(testmatr)
     dba <- matrix2databel(testmatr,file="tmp")
     dfa <- as(dba,"databel")
@@ -171,6 +194,5 @@ test.save_as <- function()
 	rm(list=ls());gc()
     
     unlink("tmp*")
-    }
 }
 

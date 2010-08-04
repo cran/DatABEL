@@ -44,12 +44,16 @@ filevector_type <- function(type)
 	#define INT                4
 	#define FLOAT              5
 	#define DOUBLE             6
+	#define CHAR               7
+	#define UNSIGNED_CHAR      8
 	if (type == "UNSIGNED_SHORT_INT") intype <- 1
 	else if (type == "SHORT_INT") intype <- 2
 	else if (type == "UNSIGNED_INT") intype <- 3
 	else if (type == "INT") intype <- 4
 	else if (type == "FLOAT") intype <- 5
 	else if (type == "DOUBLE") intype <- 6
+	else if (type == "CHAR") intype <- 7
+	else if (type == "UNSIGNED_CHAR") intype <- 8
 	else stop(paste("Unknown type:",type))
 	return(intype)
 }

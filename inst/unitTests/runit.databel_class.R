@@ -24,7 +24,7 @@ source(paste(path,"/shared_functions.R",sep=""))
 
 test.databel_class <- function()
 {
-    cat ("Running test.databel_class\n");    
+    cat ("Running test.databel_class\n");
 #    library("RUnit")
 #    library("DatABEL")
 #    source("shared_functions.R")
@@ -34,7 +34,7 @@ test.databel_class <- function()
     
 	# would fail with full range !!!
 #	dta <- make_random_matrix(range_data=c(-10,10))
-	dta <- make_random_matrix()
+	dta <- make_matrix_of_type_with_NA()
 	null <- as(dta,"databel")
     checkNumEq(dta,null)
     checkIdentical("databel",class(null)[1])
@@ -128,20 +128,20 @@ test.databel_class <- function()
     while (!any(logRow)) logRow <- (runif(nrow(dta1))<=0.1)
     table(logCol)
     table(logRow)
-    
+
     dta2 <- dta1[logRow,logCol,drop=FALSE]
     x2 <- x1[logRow,logCol]
 ### would fail with checkIdentical
 #	checkIdentical(dta2,as(x2,"matrix"))
     checkNumEq(dta2,x2)
-    
+
     dta1 <- dta[c(T,F,F,F,F),c(F,F,F,F,T),drop=FALSE]
     dim(x)
     x1 <- x[c(T,F,F,F,F),c(F,F,F,F,T)]
 ### would fail with checkIdentical
 #    checkIdentical(dta1,as(x1,"matrix"))
     checkNumEq(dta1,x1)
-    
+
 # submatrix and permute
 # on integer 
 # on logical
@@ -177,7 +177,7 @@ test.databel_class_setReadOnly <- function()
 	unlink("tmp*.fv?")
 	unlink("test*.fv?")
 	
-	dta <- make_random_matrix()
+	dta <- make_matrix_of_type_with_NA()
 	dfo <- as(dta,"databel")
 	checkNumEq(dta,dfo)
 	

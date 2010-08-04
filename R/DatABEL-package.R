@@ -7,11 +7,15 @@
 #' are accessible very quickly. 
 #' 
 #' @seealso 
-#' \code{\link{make_empty_fvf}},
+#' \code{\link{apply2dfo}},
+#' \code{\link{databel2matrix}},
+#' \code{\link{databel2text}},
+#' \code{\link{extract_text_file_columns}},
 #' \code{\link{matrix2databel}},
-#' \code{\linkS4class{databel-class}}
+#' \code{\link{text2databel}},
+#' \code{\linkS4class{databel}}
 #' 
-#' @author Yurii Aulchenko (R code), Stepan Yakovenko & Andrey Chernyh (C++ code)
+#' @author Yurii Aulchenko (R code), Stepan Yakovenko (R and C++ code), Andrey Chernyh (C++ code)
 #' 
 
 "DatABEL-package" <- function(){}

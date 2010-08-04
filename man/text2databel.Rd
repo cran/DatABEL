@@ -1,9 +1,9 @@
-\name{text2filevector}
-\alias{text2filevector}
+\name{text2databel}
+\alias{text2databel}
 \title{converts text file to filevector format...}
-\usage{text2filevector(infile, outfile, colnames, rownames, skipcols,
-    skiprows, transpose=FALSE, R_matrix=FALSE, type="DOUBLE",
-    cachesizeMb=64, readonly=TRUE, naString="NA")}
+\usage{text2databel(infile, outfile, colnames, rownames, skipcols, skiprows,
+    transpose=FALSE, R_matrix=FALSE, type="DOUBLE", cachesizeMb=64,
+    readonly=TRUE, naString="NA")}
 \description{converts text file to filevector format}
 \details{The file provides the data to be converted to filevector format.
 The file may provide the data only (no row and column names)
@@ -44,7 +44,7 @@ with row names}
 the format of R data matrix produced with 
 "write.table(...,col.mnames=TRUE,row.names=TRUE)"}
 \item{type}{data DatABEL type to use ("DOUBLE", "FLOAT", "INT", 
-"UNSIGNED_INT", "UNSIGNED_SHORT_INT", "SHORT_INT")}
+"UNSIGNED_INT", "UNSIGNED_SHORT_INT", "SHORT_INT", "CHAR", "UNSIGNED_CHAR")}
 \item{cachesizeMb}{cache size for the resulting 'databel-class' object}
 \item{readonly}{whether the resulting 'databel-class' object should 
 be opened in readonly mode}
@@ -70,34 +70,34 @@ write(colnames(data),file="test_matrix.colnames")
 write(rownames(data),file="test_matrix.rownames")
 
 # generate identical data
-text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames",R_matrix=TRUE) 
+text2databel(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames",R_matrix=TRUE)
 x <- databel("test_matrix_dimnames")
 data <- as(x,"matrix")
 data
 
 # convert text two filevector format
 
-text2filevector(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames.fvf",
+text2databel(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames.fvf",
 colnames="test_matrix.colnames",rownames="test_matrix.rownames") 
 x <- databel("test_matrix_NOnames.fvf")
 if (!identical(data,as(x,"matrix"))) stop("not identical data")
 
-text2filevector(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames_T.fvf",
+text2databel(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames_T.fvf",
 colnames="test_matrix.colnames",rownames="test_matrix.rownames",transpose=TRUE) 
 x <- databel("test_matrix_NOnames_T.fvf")
 if (!identical(data,t(as(x,"matrix")))) stop("not identical data")
 
-text2filevector(infile="test_matrix_rownames.dat",outfile="test_matrix_rownames.fvf",
+text2databel(infile="test_matrix_rownames.dat",outfile="test_matrix_rownames.fvf",
 rownames=1,colnames="test_matrix.colnames") 
 x <- databel("test_matrix_rownames.fvf")
 if (!identical(data,as(x,"matrix"))) stop("not identical data")
 
-text2filevector(infile="test_matrix_colnames.dat",outfile="test_matrix_colnames.fvf",
+text2databel(infile="test_matrix_colnames.dat",outfile="test_matrix_colnames.fvf",
 colnames=1,rownames="test_matrix.rownames") 
 x <- databel("test_matrix_colnames.fvf")
 if (!identical(data,as(x,"matrix"))) stop("not identical data")
 
-text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames.fvf",R_matrix=TRUE) 
+text2databel(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames.fvf",R_matrix=TRUE)
 x <- databel("test_matrix_dimnames.fvf")
 if (!identical(data,as(x,"matrix"))) stop("not identical data")
 
@@ -109,7 +109,7 @@ newmat[3:(NR+2),3] <- paste("r",1:NR,sep="")
 newmat
 write.table(newmat,file="test_matrix_strange.dat",col.names=FALSE,row.names=FALSE,quote=FALSE)
 
-text2filevector(infile="test_matrix_strange.dat",outfile="test_matrix_strange.fvf",
+text2databel(infile="test_matrix_strange.dat",outfile="test_matrix_strange.fvf",
 colnames=2,rownames=3) 
 x <- databel("test_matrix_strange.fvf")
 if (!identical(data,as(x,"matrix"))) stop("not identical data")

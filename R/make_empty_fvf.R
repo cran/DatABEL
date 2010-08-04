@@ -6,7 +6,7 @@
 #' @param nvariables number of variables (R columns) 
 #' @param nobservations number of observations (R rows)
 #' @param type data type of the object ("UNSIGNED_SHORT_INT", 
-#' "SHORT_INT", "UNSIGNED_INT", "INT", "FLOAT", "DOUBLE")
+#' "SHORT_INT", "UNSIGNED_INT", "INT", "FLOAT", "DOUBLE", "CHAR", "UNSIGNED_CHAR")
 #' @param cachesizeMb what cache size to use for newly generated 'databel' object
 #' @param readonly whether to open new 'databel' in readonly mode
 #' 
@@ -22,14 +22,13 @@ make_empty_fvf <- function(name, nvariables, nobservations,type = "DOUBLE", cach
 	if (nobservations <= 0) stop("number of observations should be > 0 ");
 
 
-	intype <- filevector_type(type)	
+	intype <- filevector_type(type)
 
 	result <- .Call("ini_empty_FileMatrix_R",as.character(name),as.integer(nvariables),
 			as.integer(nobservations),as.integer(intype));
 	if (!result) stop(paste("failed to make filevector file",name))
-	print(as.character(name))
+	#print(as.character(name))
 	return(databel(as.character(name),cachesizeMb=cachesizeMb,readonly=readonly))
-	
 }
 
 

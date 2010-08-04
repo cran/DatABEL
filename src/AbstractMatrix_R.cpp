@@ -481,21 +481,13 @@ extern "C" {
 
 	SEXP ini_empty_FileMatrix_R(SEXP fname, SEXP nvars, SEXP nobs, SEXP Type)
 	{
-		// internal format data types
-		//#define UNSIGNED_SHORT_INT 1
-		//#define SHORT_INT          2
-		//#define UNSIGNED_INT       3
-		//#define INT                4
-		//#define FLOAT              5
-		//#define DOUBLE             6
-
 		unsigned long numVariables = (unsigned long) INTEGER(nvars)[0];
 		unsigned long nobservations = (unsigned long) INTEGER(nobs)[0];
 		string filename = CHAR(STRING_ELT(fname,0));
 		unsigned short int type = (unsigned short int) INTEGER(Type)[0];
 
-		if (type <=0 || type > 6) {
-			error_R("unknow type %u\n",type);
+		if (type <=0 || type > 8) {
+			error_R("Unknown data type %u\n",type);
 			return R_NilValue;
 		}
 		try {
@@ -564,7 +556,7 @@ extern "C" {
 		return ret;
 	}
 
-	SEXP saveAsText(SEXP New_file_name, SEXP IntPars, SEXP s) 	{
+	SEXP saveAsText(SEXP s, SEXP New_file_name, SEXP IntPars, SEXP NANString ) 	{
 		AbstractMatrix * p = getAbstractMatrixFromSEXP(s);
 		if (p == NULL) {
 			error_R("pointer is NULL\n");
@@ -572,41 +564,37 @@ extern "C" {
 		}
 
 		string newFilename = CHAR(STRING_ELT(New_file_name,0));
-		unsigned long nvars = (unsigned long) INTEGER(IntPars)[0];
-		unsigned long nobss = (unsigned long) INTEGER(IntPars)[1];
-		unsigned long * varindexes = new (std::nothrow) unsigned long [nvars];
-		if (varindexes == NULL) {
-			error_R("pointer is NULL\n");
-			return R_NilValue;
-		}
-		unsigned long * obsindexes = new (std::nothrow) unsigned long [nobss];
-		if (obsindexes == NULL) {
-			error_R("pointer is NULL\n");
-			delete [] varindexes;
-			return R_NilValue;
-		}
+		string nanString = CHAR(STRING_ELT(NANString,0));
+		bool showVarNames = LOGICAL(IntPars)[0];
+		bool showObsNames = LOGICAL(IntPars)[1];
+		bool transpose = LOGICAL(IntPars)[2];
 
-		for (unsigned long i = 0; i < nvars; i++)
-			varindexes[i] = (unsigned long) INTEGER(IntPars)[i+2];
-		for (unsigned long i = 0; i < nobss; i++) {
-			obsindexes[i] = (unsigned long) INTEGER(IntPars)[i+2+nvars];
+        AbstractMatrix *transposed = p;
+        string tmpFileName,tmpFileName2;
+        if (!transpose){
+		    Transposer transposer;
+		    tmpFileName= p->getFileName() + string("_saveAsText_tmp");
+		    tmpFileName2= p->getFileName() + string("_saveAsText_tmp2");
+		    p->saveAs(tmpFileName);
+		    transposer.process(tmpFileName, tmpFileName2, true);
+		    transposed = new FileVector(tmpFileName2, p->getCacheSizeInMb());
 		}
 
 		try {
-		    cout << "here we are"<<endl;
-			p->saveAsText(newFilename,nvars,nobss,varindexes,obsindexes);
+			transposed->saveAsText(newFilename, showVarNames, showObsNames, nanString);
 		} catch (int errcode) {
 			error_R("can not save data to file %s\n",newFilename.c_str());
-			delete [] obsindexes;
-			delete [] varindexes;
 			return R_NilValue;
 		}
+        if (!transpose){
+            delete transposed;
+            unlink(tmpFileName.c_str());
+            unlink(tmpFileName2.c_str());
+        }
 
 		SEXP ret;
 		PROTECT(ret = allocVector(LGLSXP, 1));
 		LOGICAL(ret)[0] = TRUE;
-		delete [] obsindexes;
-		delete [] varindexes;
 
 		UNPROTECT(1);
 		return ret;
@@ -618,6 +606,84 @@ extern "C" {
     	}
 	    return R_NilValue;
 	}
+
+	/**
+	*  direction: 0 -- copy values from @values to @ptr,
+	*             1 -- copy values from @ptr to @values...
+	*/
+	SEXP assignDoubleMatrix(SEXP ptr, SEXP obsIndexes, SEXP varIndexes, SEXP values, SEXP direction){
+		flush(cout);
+		
+	    unsigned long varNum, obsNum, obsIndexNum, varIndexNum;
+
+		AbstractMatrix * p = getAbstractMatrixFromSEXP(ptr);
+        double coeff = 1. * length(obsIndexes) / p->getNumObservations();
+
+		unsigned long dir = (unsigned long) INTEGER(direction)[0];
+
+        double *currentValues;
+        if (!(coeff < WRITE_SPEED_PROPORTION)) {
+            currentValues = new double[p->getNumObservations()];
+        }
+
+        unsigned long varIndexesLength = length(varIndexes);
+        unsigned long obsIndexesLength = length(obsIndexes);
+
+	    for(varIndexNum = 0; varIndexNum < varIndexesLength; varIndexNum ++){
+	        varNum = (unsigned long)INTEGER(varIndexes)[varIndexNum]-1;
+
+	        if ( coeff < WRITE_SPEED_PROPORTION) {
+		
+    	        for(obsIndexNum = 0; obsIndexNum < obsIndexesLength; obsIndexNum ++){
+	                obsNum = (unsigned long)INTEGER(obsIndexes)[obsIndexNum]-1;
+	                try {
+	                    if (dir==0) {
+     	                    double value = REAL(values)[varIndexNum *obsIndexesLength + obsIndexNum];
+                            p->writeElementAs(varNum, obsNum,value);
+                        } else {
+     	                    double value;
+                            p->readElementAs(varNum, obsNum,value);
+                            REAL(values)[varIndexNum *obsIndexesLength + obsIndexNum] = value;
+                        }
+                    } catch(int errorCode) {
+                        return R_NilValue;
+                    }
+	            }
+	        } else {
+	            try {
+                    if (dir==0) {
+    	                p->readVariableAs(varNum, currentValues);
+        	            for(obsIndexNum = 0; obsIndexNum < obsIndexesLength; obsIndexNum ++){
+    	                    obsNum = (unsigned long)INTEGER(obsIndexes)[obsIndexNum] - 1;
+        	                currentValues[obsNum] = REAL(values)[varIndexNum*obsIndexesLength+obsIndexNum];
+        	            }
+                        p->writeVariableAs(varNum, currentValues);
+        	        } else {
+    	                p->readVariableAs(varNum, currentValues);
+        	            for(obsIndexNum = 0; obsIndexNum < obsIndexesLength; obsIndexNum ++){
+    	                    obsNum = (unsigned long)INTEGER(obsIndexes)[obsIndexNum] - 1;
+        	                REAL(values)[varIndexNum*obsIndexesLength+obsIndexNum] = currentValues[obsNum];
+        	            }
+        	        }
+                } catch(int errorCode){
+                    delete [] currentValues;
+                    return R_NilValue;
+                }
+	        }
+	    }
+
+        if (!(coeff < WRITE_SPEED_PROPORTION)) {
+	        delete [] currentValues;
+	    }
+
+		SEXP ret;
+		PROTECT(ret = allocVector(LGLSXP, 1));
+		LOGICAL(ret)[0] = TRUE;
+		UNPROTECT(1);
+		flush(cout);
+		return ret;
+	}
+
 
 
 #ifdef __cplusplus

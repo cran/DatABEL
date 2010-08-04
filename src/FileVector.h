@@ -47,50 +47,55 @@ private:
 	unsigned long cache_size_bytes;
 	unsigned long max_buffer_size_bytes;
 	// which variables are now in cache
-	unsigned long in_cache_from;
-	unsigned long in_cache_to;
-	char * cached_data;
-	char * char_buffer;
+	unsigned long cacheBegin;
+	unsigned long cacheEnd;
+	char * cacheBuffer;
 	bool readOnly;
 	bool updateNamesOnWrite;
 		
 public:
 	FileVector();
 	~FileVector();
+	
 	FileVector(string iFilename, unsigned long cachesizeMb) : filename (iFilename) {
 		readOnly = false;
 		updateNamesOnWrite = false;
-		char_buffer = 0;
+		cacheBuffer = 0;
 		initialize(cachesizeMb);
+		getWarningIsShown() = false;
 	}
 
 	FileVector(string iFilename, unsigned long cachesizeMb, bool iReadOnly) : filename(iFilename), readOnly(iReadOnly) {
 		updateNamesOnWrite = false;
-		char_buffer = 0;
+		cacheBuffer = 0;
 		initialize(cachesizeMb);
+		getWarningIsShown() = false;
     }
 
 	FileVector(char *iFilename, unsigned long cachesizeMb) : filename(string(iFilename)){
 		updateNamesOnWrite = false;
 		readOnly = false;
 		string filename(iFilename);
-		char_buffer = 0;
+		cacheBuffer = 0;
 		initialize(cachesizeMb);
+		getWarningIsShown() = false;
 	}
 
 	FileVector(char *iFilename, unsigned long cachesizeMb, bool iReadOnly) : filename(string(iFilename)), readOnly(iReadOnly) {
 		updateNamesOnWrite = false;
-		char_buffer = 0;
+		cacheBuffer = 0;
 		initialize(cachesizeMb);
+        getWarningIsShown() = false;
 	}
 	// for testing purposes
-	void getPrivateCacheData(unsigned long* cacheSizeNVars, unsigned long *inCachFrom, unsigned long *inCacheTo );
+	void getPrivateCacheData(unsigned long* cacheSizeNVars, unsigned long *inCachFrom, unsigned long *cacheEnd );
 
 	// these ones are the actual used to initialize and free up
 	void initialize(unsigned long cachesizeMb);
 	void deInitialize();
 	// this one updates cache
-	void update_cache(unsigned long from_var);
+	void updateCache(unsigned long from_var);
+
 	// gives element number from varIdx & obsIdx
 	unsigned long nrnc_to_nelem(unsigned long varIdx, unsigned long obsIdx);
 
@@ -98,6 +103,7 @@ public:
 	void writeVariableName(unsigned long varIdx, FixedChar name);
 	void writeObservationName(unsigned long obsIdx, FixedChar name);
 
+    virtual string getFileName();
 	virtual unsigned long getNumVariables();
 	virtual unsigned long getNumObservations();
 
@@ -124,7 +130,7 @@ public:
 	void saveVariablesAs( string newFilename, unsigned long nvars, unsigned long * varindexes);
 	void saveObservationsAs( string newFilename, unsigned long nobss, unsigned long * obsindexes);
 	void saveAs(string newFilename, unsigned long nvars, unsigned long nobss, unsigned long * varindexes, unsigned long * obsindexes);
-	void saveAsText(string newFilename, unsigned long nvars, unsigned long nobss, unsigned long * varindexes, unsigned long * obsindexes);
+	void saveAsText(string newFilename, bool saveVarNames, bool saveObsNames, string nanString);
 
 	unsigned long getCacheSizeInMb();
 	void setCacheSizeInMb( unsigned long cachesizeMb );
@@ -144,6 +150,7 @@ public:
 	//	DT readElement(unsigned long nelment);
 private :
 	void copyVariable(char * to, char * from, int n, unsigned long * indexes );
+    void calcCachePos(unsigned long newPos, unsigned long &cacheBegin, unsigned long &cacheEnd);
 };
 
 //global variables

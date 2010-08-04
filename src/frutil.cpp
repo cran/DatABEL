@@ -55,8 +55,14 @@ unsigned short calcDataSize(unsigned short int type){
 	  case DOUBLE:
 		desize = sizeof(double);
 		break;
+	  case SIGNED_CHAR:
+		desize = sizeof(char);
+		break;
+	  case UNSIGNED_CHAR:
+		desize = sizeof(unsigned char);
+		break;
 	  default:
-		errorLog << "file contains data of unknown type" << endl << errorExit;
+		errorLog << "file contains data of unknown type " << type << endl << errorExit;
 	}
 	return desize;
 }

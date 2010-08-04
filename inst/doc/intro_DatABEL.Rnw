@@ -11,8 +11,8 @@
 
 \newcommand{\DA}{\texttt{DatABEL} }
 
-\title{Intro to \DA}
-\author{Yurii S. Aulchenko}
+\title{Introduction to \DA}
+\author{Yurii S. Aulchenko, Stepan Yakovenko}
 %\date{\today}
 
 \begin{document}
@@ -20,50 +20,309 @@
 \maketitle
 \tableofcontents
 
+\section{Introduction}
+
+This vignette demonstrates the use of all major \texttt{DatABEL} 
+functions. Central to \texttt{DatABEL} library is the \texttt{databel} class, which 
+is defined as following:
+\begin{verbatim}
+setClass(
+    Class = "databel",
+    representation = representation(
+        usedRowIndex = "integer",  
+        usedColIndex = "integer",  
+        uninames = "list", 
+        backingfilename = "character",  
+        cachesizeMb = "integer",  
+        data = "externalptr" 
+    ),
+    package = "DatABEL"
+);
+\end{verbatim}
+here, \texttt{data} is external pointer to an instance of \texttt{FilteredMatrix} 
+class of \texttt{filevector} library, \texttt{usedRowIndex} and \texttt{usedColIndex} 
+keep the indexes of not masked columns and rows, \texttt{backingfilename} is the 
+base name of the \texttt{filevector} data/index files, and \texttt{cachesizeMb} specifies 
+the amount of RAM used for cache. The \texttt{uninames} list specifies whether 
+the column and/or row names are unique and thus may be used to access the data. 
+
+The methods defined for \texttt{databel} class are similar to that 
+defined for standard matrices and allow to
+(throughout, \texttt{DAdata} refers to an object of \texttt{databel} class):
+\begin{itemize}
+\item Obtain information about underlying data (\texttt{show}, \texttt{dim}, \texttt{dimnames}, 
+\texttt{get\_dimnames}, \texttt{length}, \texttt{backingfilename} and \texttt{cachesizeMb}).
+The function \texttt{get\_dimnames} returns a list with row and column names defined 
+for the data object; the function \texttt{dimnames} does so if the names are unique; 
+in case row/column names are not unique \texttt{NULL} is returned for that dimension. 
+\item Set some attributes (\texttt{dimnames<-}, \texttt{set\_dimnames<-}, 
+\texttt{cachesizeMb<-} and \texttt{setReadOnly<-}).
+\item Connect and disconnect R object of \texttt{databel}-class to/from the 
+underlying binary data (\texttt{connect} and \texttt{disconnect}; these functions 
+destroy or initiate an instance of \texttt{FilteredMatrix}.
+\item Save (sub-set) of \texttt{databel} matrix as new binary set of files (\texttt{save\_as}) 
+or export to plain text files (\texttt{databel2text})
+\item Obtain sub-sets of a \texttt{databel} object (operation \texttt{[}).
+\item Replace values in the matrix (operation \texttt{[<-})
+\item Coercion of \texttt{databel} matrix to standard R matrix and vector and 
+coercion of R matrix to \texttt{databel} matrix.
+\end{itemize}
+
+Internally, \texttt{databel} data may comprise eight different types
+(float, double, signed/unsigned (short) int, signed/unsigned byte).
+In C++, two of these (double and float) have support for missing 
+values ('not a number'). For the rest, we reserved the maximal value to 
+texttt for the missing data. 
+
+Additionally functions to convert plain text files to \texttt{databel} format
+ (\texttt{text2databel}) and 
+to export \texttt{databel} data to plain text (\texttt{databel2text}) are provided.
+Another function (\texttt{apply2dfo}) is similar to standard R \texttt{apply} 
+and allows application of user-defined function to all rows/columns of the 
+data. 
+
+\section{Conversion of the data to \texttt{databel} format, initialization of 
+\texttt{databel} objects, and value modifications}
+
+<<echo=FALSE>>=
+#unlink("*.fv?")
+#unlink("*.txt")
+@
+
+To start using \texttt{DatABEL} you first need to load the library:
 <<>>=
 library(DatABEL)
-
-make_random_matrix <- function(range_dim1 = c(2,10), range_dim2 = c(2,10), range_data = c(-10,10), type="double")
-{
-    dim1 <- round(runif(1,range_dim1[1],range_dim1[2]))
-    dim2 <- round(runif(1,range_dim2[1],range_dim2[2]))
-    data <- runif(dim1*dim2,range_data[1],range_data[2])
-    data <- as(data,type)
-    data <- matrix(data,nrow=dim1,ncol=dim2)
-    namesCol <- paste("col",c(1:dim2),sep="_")
-    namesRow <- paste("row",c(1:dim1),sep="_")
-    dimnames(data) <- list(namesRow,namesCol)
-    return(data)
-}
-
-testmatr <- make_random_matrix()
-testmatr
-test_fv <- as(testmatr,"databel")
-test_fv
-as(test_fv,"matrix")
-abs(testmatr-as(test_fv,"matrix"))<1e-6
-
-write.table(testmatr,file="test_matrix_dimnames.dat",row.names=TRUE,col.names=TRUE,quote=FALSE)
-
-text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames",R_matrix=TRUE) 
-x <- databel("test_matrix_dimnames")
-x
-tmp <- as(x,"matrix")
-tmp
-abs(testmatr-tmp)<1e-6
-
-text2filevector(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames_T",
-		R_matrix=TRUE,transpose=TRUE) 
-x <- databel("test_matrix_dimnames_T")
-t(testmatr)
-x
-tmp <- as(x,"matrix")
-tmp
-abs(t(testmatr)-tmp)<1e-6
-
-unlink("*.fv?")
-unlink("test_matrix_*")
-
 @
+
+We will first create an R matrix and will convert that to 
+\texttt{databel} format. For that, 
+create R matrix:
+<<>>=
+matr <- matrix (c(1:12),ncol=3,nrow=4)
+matr[3,2] <- NA
+matr
+dimnames(matr) <- list(paste("row",1:4,sep=""),paste("col",1:3,sep=""))
+matr
+@
+
+Conversion from R matrix to \texttt{databel} may be performed in 
+two ways, using generic 'as' function or \texttt{matrix2databel} 
+function. The difference is that when using 'as' the backing data 
+file is named by generating a random name and the type used for 
+storage is 'double', while with 
+\texttt{matrix2databel} function the user may choose the backing data 
+file name and the type of the data him or herself. Thus, 'as' should be used to 
+create temporary \texttt{databel} objects:
+<<>>=
+list.files(pattern="*.fv?")
+dat1 <- as(matr,"databel")
+list.files(pattern="*.fv?")
+@
+
+You can see that after application of \texttt{as} method, 
+two files containing data backing the 'dat1' have appeared.
+
+The 'show' method shows basic information for the object:
+<<>>=
+dat1
+@
+
+Note that for big matrices only summaries and small part of the data
+will appear on the screen. 
+
+To keep the naming of the backing files, underlying data type 
+and other details under control, use  
+\texttt{matrix2databel} function:
+<<>>=
+dat2 <- matrix2databel(matr, filename="matr",cachesizeMb=16, type="UNSIGNED_CHAR",readonly=FALSE)
+dat2
+@
+
+You can see that now the backing files are \texttt{matr.fvd} and \texttt{matr.fvi}:
+<<>>=
+list.files(pattern="*.fv?")
+@
+
+If you try to create a new object with the same backing files, 
+an error will appear. 
+
+A new \texttt{databel} object can be initialized directly from 
+the backing file:
+<<>>=
+dat3 <- databel("matr")
+dat3
+@
+
+A \texttt{databel} object can also be created from a text file. 
+First, we will create a text file
+<<>>=
+write.table(matr,"matr.txt",row.names=TRUE,col.names=TRUE,quote=FALSE)
+@
+and then convert that to \texttt{databel} format
+<<>>=
+dat4 <- text2databel("matr.txt",outfile="matr1",R_matrix=TRUE,type="UNSIGNED_INT")
+dat4
+@
+
+Finally, a \texttt{databel} object can be initialized from other \texttt{databel}
+object
+<<>>=
+dat5 <- dat4
+@
+or, through use of \texttt{'['}
+<<>>=
+dat6 <- dat1[c("row1","row3"),c("col1","col2")]
+dat6
+@
+
+Thus, at the moment we have generated five \texttt{databel} objects containing 
+identical data (though underlying type is different: double, unsigned byte and 
+unsigned int) and one object ('dat6') which contains subset of the data.
+Objects 'dat1' and 'dat6' are using the same backing data file 
+\texttt{\Sexpr{backingfilename(dat1)}},
+objects 'dat4' and 'dat5' are connected to \texttt{\Sexpr{backingfilename(dat4)}}, and 
+'dat2' and 'dat3' are connected to \texttt{\Sexpr{backingfilename(dat2)}}.
+
+The data contained in \texttt{databel} matrices may be modified by 
+use of \texttt{[<-} method:
+<<>>=
+dat1[1,1] <- 321
+@
+
+Note that because 'dat1' and 'dat6' are connected to the same binary 
+data, modification of 'dat1' leads automatically to modification of 
+'dat6':
+<<>>=
+dat6
+@
+
+To avoid read/write conflicts, all consecutive objects 
+based on the same backing files will be connected in 
+read-only mode (so that trying '\texttt{dat6[1,1] <- 123}' 
+will generate an error). We will show how to work around this
+situation at the end of the next section.
+
+\section{Obtain and modifying attributes}
+
+Several standard methods defined for matrix are defined for 
+\texttt{databel} matrices as well. For example 
+<<>>=
+dim(dat1)
+length(dat1)
+dimnames(dat1)
+colnames(dat1)
+rownames(dat1)
+@
+
+The method \texttt{dimnames<-} may be used to modify the 
+names:
+<<>>=
+dimnames(dat1) <- list(paste("ID",1:4,sep=""),paste("SNP",1:3,sep=""))
+dimnames(dat1)
+@
+
+Additional methods defined for \texttt{databel} matrices
+allow to obtain information about backing file name
+<<<>>=
+backingfilename(dat1)
+@
+and size of cache used 
+<<>>=
+cachesizeMb(dat1)
+@
+
+The size of cache can be modified by
+<<>>=
+cachesizeMb(dat1) <- 1
+cachesizeMb(dat1)
+@
+
+A method \texttt{get\_dimnames} is defined to obtain 
+row/column names in case these are not uniqie. 
+To demonstrate use of this method, we need first to 
+create a \texttt{databel} matrix with non-unique 
+dimnames. To set such not unique names, we will use 
+method \texttt{set\_dimnames}:
+<<>>=
+set_dimnames(dat1) <- list(dimnames(dat1)[[1]],c("duplicate","col2","duplicate"))
+@
+
+Now \texttt{dimnames} returns \texttt{NULL} for the second dimension 
+names:
+<<>>=
+dimnames(dat1)
+@
+while \texttt{get\_dimnames} still allows access to the names:
+<<>>=
+get_dimnames(dat1)
+@
+
+Finally, the read-only flag can be modifed. The following code 
+demonstrates how to modify the 'dat6' object:
+<<>>=
+disconnect(dat1)
+setReadOnly(dat6) <- FALSE
+dat6[1,1] <- 123
+dat6
+dat1
+@
+
+\section{Coersion and exports}
+
+A standard R matrix can be obtained from a \texttt{databel} matrix 
+by use of function 'as':
+<<>>=
+newm <- as(dat2,"matrix")
+class(newm)
+class(newm[1,1])
+newm
+@
+
+A data from \texttt{databel} matrix may be exported to a text file 
+using function
+<<>>=
+databel2text(dat2,file="dat2.txt")
+@ 
+
+Now 'dat2.txt' contains the data readable with
+<<>>=
+read.table("dat2.txt")
+@
+
+\section{Using \texttt{apply2dfo} function}
+
+The \texttt{apply2dfo} is a powerful function allowing 
+complicated analysis of data stored in \texttt{databel} 
+matrix. We will demonstrate the basic use of this function here.
+First, we will compute row and columns sums:
+<<>>=
+apply2dfo(SNP,dfodata=dat2,anFUN="sum",MAR=2)
+apply2dfo(SNP,dfodata=dat2,anFUN="sum",MAR=1)
+@
+the 'SNP' stays for current analysis variable (row or column) 
+and allows specification of more complicated analysis, e.g.
+<<>>=
+apply2dfo(SNP^2,dfodata=dat2,anFUN="sum",MAR=2)
+@
+or such analysis as consecutive linear regression 
+<<>>=
+Y <- rnorm(4)
+apply2dfo(Y~SNP,dfodata=dat2,anFUN="lm",MAR=2)
+apply2dfo(Y~SNP+I(SNP^2),dfodata=dat2,anFUN="lm",MAR=2)
+@
+
+Even more complicated analysis may be done by user specifying 
+own analysis and result processing functions (see package 
+documentation). 
+
+\section{Citation}
+
+WILL BE UPDATED AT THE TIME THE PAPER IS ACCEPTED 
+
+<<echo=FALSE>>=
+#unlink("*.fv?")
+#unlink("*.txt")
+@
+
 
 \end{document}

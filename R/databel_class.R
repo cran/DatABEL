@@ -104,7 +104,7 @@ setMethod(
 			}
 			
 #			cat("----- databel ini end -------\n");
-			
+
 			return(.Object)
 		}
 );
@@ -243,27 +243,18 @@ setMethod(
 #			print("started [<-")
 			connected <- databel_check(x)
 			if (!connected) stop("databel [<-: databel_check failed")
-			
+
 			newi <- convert_intlogcha_index_to_int(i,x,1)
 			newj <- convert_intlogcha_index_to_int(j,x,2)
-			
+
 			if (length(value) != length(newi)*length(newj)) stop("databel [<-: dimensions of i,j,value do not match")
 			
-			value <- matrix(value,ncol=length(newj),nrow=length(newi))
-			
-			# this is an expensive way, should re-write for better performance
-			kkk <- 1
-			for (k in newj) {
-				cur_value <- as(x[,k],"vector")
-				cur_value[newi] <- value[,kkk]
-#				print(c(k,":",cur_value))
-				if (!.Call("write_variable_double_FileMatrix_R",
-						as.integer(k),
-						as.double(cur_value),
-						x@data,PACKAGE="DatABEL"))
-					stop("databel [<-: can not write variable")
-				kkk <- kkk + 1
-			}
+#			value <- matrix(value,ncol=length(newj),nrow=length(newi))
+#            print(newi);
+#            print(newj);
+
+			if(!.Call("assignDoubleMatrix", x@data, newi, newj, as.double(value),as.integer(0)))
+			    stop("databel [<-: can't write variable.");
 #			print("finished [<-")
 			return(x)
 		}
@@ -308,30 +299,22 @@ setAs("databel","vector",
 
 setAs("databel","matrix",
 		function(from) {
-			connected <- databel_check(from)
-			if (!connected) stop("setAs('databel','matrix'): check_connected failed")
-			dims <- dim(from)
-#			print(c(dims,class(from),from@usedColIndex,from@data,from@usedRowIndex))
-			to <- matrix(NA,ncol=dims[2],nrow=dims[1]);
-			tmpout <- rep(0,dims[1]);
-			for (iii in 1:dims[2]) {
-				tmpout <- .Call("read_variable_double_FileMatrix_R",as.integer(iii),from@data,PACKAGE="DatABEL")
-#				print(c(iii,tmpout))
-				to[,iii] <- tmpout
-			}
-			dimnames(to) <- dimnames(from)
-			return(to)
+	        connected <- databel_check(from)
+   			if (!connected) stop("setAs('databel','matrix'): check_connected failed")
+			return(databel2matrix(from))
 		}
 );
 
 
 setAs("matrix","databel",
 		function(from) {
+		    #print("as matrix->databel begin");
 			if (!is.numeric(from)) stop("from must be numeric (integer or double)")
 			type <- "DOUBLE"
 			tmpfilename <- get_temporary_file_name();
 			to <- matrix2databel(from,filename=tmpfilename,cachesizeMb=64,type=type)
 			cat("coersion from 'matrix' to 'databel' of type",type,"; object connected to file",tmpfilename,"\n")
+			#print("as matrix->databel end");
 			return(to)
 		}
 );
@@ -499,38 +482,6 @@ setMethod(
 		}
 );
 
-setGeneric(
-		name = "save_as_text",
-		def = function(x,rows,cols,file,cachesizeMb=64,readonly=TRUE) {standardGeneric("save_as_text");}
-);
-
-
-setMethod(
-		f = "save_as_text",
-		signature = "databel",
-		definition = function(x,rows,cols,file,cachesizeMb=64,readonly=TRUE)
-		{
-			#allowd_types <- c("databel","text")
-			if (!is.character(file)) stop("databel save_as: file argument should be character")
-			if (!missing(rows)) {
-				newi <- convert_intlogcha_index_to_int(rows,x,1)
-			} else {
-				newi <- 1:dim(x)[1]
-			}
-			if (!missing(cols)) {
-				newj <- convert_intlogcha_index_to_int(cols,x,2)
-			} else {
-				newj <- 1:dim(x)[2]
-			}
-
-			intpar <- as.integer(c(length(newj),length(newi),(newj-1),(newi-1)))
-#			print(intpar)
-			if (!.Call("saveAsText",file,intpar,x@data))
-				stop("can not save_as_text(): saveAsText failed")
-			return(x)
-		}
-);
-
 
 setGeneric(
 		name = "connect",
@@ -579,8 +530,8 @@ setMethod(
 				warning("object is already disconnected")
 				return()
 			}
-			tmp <- .Call("disconnectFilteredAndAbstract_R",object@data,PACKAGE="DatABEL");
-			gc();
+			tmp0 <- .Call("disconnectFilteredAndAbstract_R",object@data,PACKAGE="DatABEL");
+			tmp1 <- gc();
 		}
 );
 

@@ -11,6 +11,8 @@
 #define INT                4
 #define FLOAT              5
 #define DOUBLE             6
+#define SIGNED_CHAR        7
+#define UNSIGNED_CHAR      8
 
 // number of chars used to keep var/obs names
 #define NAMELENGTH        32

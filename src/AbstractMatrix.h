@@ -9,6 +9,10 @@ using namespace std;
 #include "frutil.h"
 #include "CastUtils.h"
 
+#define WRITE_SPEED_PROPORTION .01
+
+// See filteredMatrix.h for detailed comments
+
 class AbstractMatrix {
 public:
     virtual ~AbstractMatrix(){};
@@ -20,7 +24,7 @@ public:
         if(!tmp)
             errorLog << "writeVariableAs allocation error" << errorExit;
         for(unsigned long int i = 0; i< getNumObservations();i++){
-            performCast(&tmp[i*getElementSize()],outvec[i],getElementType());
+            performCast(&tmp[i*getElementSize()],outvec[i],getElementType(), warningIsShown);
         }
         writeVariable(varIdx, tmp);
         delete[] tmp;
@@ -33,7 +37,7 @@ public:
         if(!tmp)
             errorLog << "add_variable_as allocation error" << errorExit;
         for(unsigned long int i = 0; i< getNumObservations();i++){
-            performCast(&tmp[i*getElementSize()],outvec[i],getElementType());
+            performCast(&tmp[i*getElementSize()],outvec[i],getElementType(), warningIsShown);
         }
         addVariable (tmp, varname);
         delete[] tmp;
@@ -45,7 +49,7 @@ public:
        char * tmp = new (nothrow) char[getNumObservations()*getElementSize()];
        readVariable(varIdx, tmp);
        for(unsigned long int i = 0; i< getNumObservations();i++) {
-            performCast(outvec[i],&tmp[i*getElementSize()],getElementType());
+            performCast(outvec[i],&tmp[i*getElementSize()],getElementType(),warningIsShown);
        }
        delete[] tmp;
     }
@@ -54,7 +58,7 @@ public:
     void readElementAs(unsigned long varNumber, unsigned long obsNumber, DT & element){
         char *ret= new char [getElementSize()];
         readElement(varNumber, obsNumber, ret);
-        performCast(element, ret, getElementType());
+        performCast(element, ret, getElementType(), warningIsShown);
         delete [] ret;
     }
 
@@ -64,10 +68,12 @@ public:
        deepDbg << "Alloc getElementSize() = " << getElementSize() << endl;
        char *ret = new char [getElementSize()];
        deepDbg << "Perform cast" << endl;
-       performCast(ret, element, getElementType());
+       performCast(ret, element, getElementType(), warningIsShown);
        writeElement(varNumber, obsNumber, ret);
        delete [] ret;
     }
+
+    virtual string getFileName() = 0;
 
     virtual unsigned long getNumVariables() = 0;
     virtual unsigned long getNumObservations() = 0;
@@ -77,7 +83,7 @@ public:
    	virtual void saveObservationsAs( string newFilename, unsigned long nobss, unsigned long * obsindexes) = 0;
 
     virtual void saveAs(string newFilename, unsigned long nvars, unsigned long nobss, unsigned long * varindexes, unsigned long * obsindexes) = 0;
-    virtual void saveAsText(string newFilename, unsigned long nvars, unsigned long nobss, unsigned long * varindexes, unsigned long * obsindexes) = 0;
+    virtual void saveAsText(string newFilename, bool saveVarNames, bool saveObsNames, string nanString) = 0;
 
     virtual void readObservation(unsigned long obsIdx, void * outvec) = 0;
     virtual void writeObservation(unsigned long obsIdx, void * invec) = 0;
@@ -106,6 +112,7 @@ public:
 	static void checkOpenForWriting(const string fileName);
 	static void closeForWriting(const string fileName);
 
+	bool &getWarningIsShown(){ return warningIsShown;}
 private:
 
     // HIGH -- here I see the possibility to make these functions faster then "random" access functions
@@ -115,6 +122,7 @@ private:
     //    virtual void add_observation(void * invec, string obsname) = 0;
     // write single element
     // CURRENTLY CACHE IS NOT UPDATED!
+    bool warningIsShown;
 };
 
 #endif
