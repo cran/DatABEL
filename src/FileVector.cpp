@@ -8,14 +8,18 @@ using namespace std;
 #include "frutil.h"
 
 void FileVector::saveIndexFile() {
-	indexFile.seekp(0, ios::beg);
-	indexFile.write((char*)&fileHeader, sizeof(fileHeader));
-	indexFile.seekp(sizeof(fileHeader), ios::beg);
+
+    if (readOnly)
+        return;
+
+	indexFile.fseek(0);
+	indexFile.blockWriteOrRead(sizeof(fileHeader),(char*)&fileHeader, true);
+	indexFile.fseek(sizeof(fileHeader));
 
 	if (observationNames && variableNames) {
-		blockWriteOrRead(indexFile,sizeof(FixedChar)*fileHeader.numObservations,(char*)observationNames,true);
-		indexFile.seekp(sizeof(fileHeader)+sizeof(FixedChar)*fileHeader.numObservations, ios::beg);
-		blockWriteOrRead(indexFile,sizeof(FixedChar)*fileHeader.numVariables,(char*)variableNames,true);
+		indexFile.blockWriteOrRead(sizeof(FixedChar)*fileHeader.numObservations,(char*)observationNames,true);
+		indexFile.fseek(sizeof(fileHeader)+sizeof(FixedChar)*fileHeader.numObservations);
+		indexFile.blockWriteOrRead(sizeof(FixedChar)*fileHeader.numVariables,(char*)variableNames,true);
 	}
 }
 
@@ -33,7 +37,6 @@ void FileVector::deInitialize(){
 }
 
 FileVector::~FileVector() {
-	dbg << "Closing FileVector" << endl;
 	deInitialize();
 }
 
@@ -62,25 +65,19 @@ void FileVector::initialize(unsigned long cachesizeMb) {
 	struct stat index_filestatus;
 	stat(indexFilename.c_str(), &index_filestatus);
 
-	if (readOnly) {
-		indexFile.open(indexFilename.c_str(), ios::in | ios::binary);
-	} else {
-		indexFile.open(indexFilename.c_str(), ios::out | ios::in | ios::binary);
-	}
+    indexFile = ReusableFileHandle::getHandle(indexFilename, readOnly);
+
 	if (!indexFile) {
 		errorLog << "Opening file "<< indexFilename <<" for write & read failed\n" << errorExit;
 	}
 
-	if (readOnly) {
-		dataFile.open(dataFilename.c_str(), ios::in | ios::binary);
-	} else {
-		dataFile.open(dataFilename.c_str(), ios::out | ios::in | ios::binary);
-	}
+    dataFile = ReusableFileHandle::getHandle(dataFilename, readOnly);
+
 	if (!dataFile) {
 		errorLog << "Opening file "<< dataFilename << " for write & read failed\n" << errorExit;
 	}
 
-	indexFile.read((char*)&fileHeader, sizeof(fileHeader));
+	indexFile.blockWriteOrRead(sizeof(fileHeader),(char*)&fileHeader, false);
 	if (!indexFile){
 		errorLog << "Failed to read datainfo from file:" << indexFilename << endl;
 	}
@@ -143,11 +140,11 @@ void FileVector::readNames() {
 	observationNames = new (nothrow) FixedChar [fileHeader.numObservations];
 	if (!observationNames) errorLog << "can not get RAM for observation names" << errorExit;
 
-	indexFile.seekg(sizeof(fileHeader), ios::beg);
+	indexFile.fseek(sizeof(fileHeader));
 	for (unsigned long i=0;i<fileHeader.numObservations;i++)
-		indexFile.read((char*)(observationNames+i),sizeof(FixedChar));
+		indexFile.blockWriteOrRead(sizeof(FixedChar), (char*)(observationNames+i), false);
 	for (unsigned long i=0;i<fileHeader.numVariables;i++)
-		indexFile.read((char*)(variableNames+i),sizeof(FixedChar));
+		indexFile.blockWriteOrRead(sizeof(FixedChar), (char*)(variableNames+i), false);
 }
 
 unsigned long FileVector::getCacheSizeInMb() {
@@ -213,9 +210,9 @@ void FileVector::updateCache(unsigned long varIdx) {
     // first load ?
     if (cacheEnd==0 && cacheBegin==1){
         calcCachePos(varIdx, cacheBegin, cacheEnd);
-        dataFile.seekg(cacheBegin, ios::beg);
+        dataFile.fseek(cacheBegin);
         dbg << "First time cache load." << endl;
-        blockWriteOrRead(dataFile, cache_size_bytes, cacheBuffer, false);
+        dataFile.blockWriteOrRead(cache_size_bytes, cacheBuffer, false);
         if (!dataFile){
             errorLog << "Inner error reading file."<< endl << errorExit;
         }
@@ -279,8 +276,8 @@ void FileVector::updateCache(unsigned long varIdx) {
         memmove(cacheBuffer + newPos * getElementSize() * getNumObservations(), cacheBuffer + oldPos * getElementSize() * getNumObservations(),  memMoveSize * getElementSize() * getNumObservations());    
     }
 
-    dataFile.seekg(loadPos * getElementSize() * getNumObservations(), ios::beg);
-    blockWriteOrRead(dataFile, hddReadSize* getElementSize() * getNumObservations(), cacheBuffer+inMemLoadPos* getElementSize() * getNumObservations(), false);
+    dataFile.fseek(loadPos * getElementSize() * getNumObservations());
+    dataFile.blockWriteOrRead( hddReadSize* getElementSize() * getNumObservations(), cacheBuffer+inMemLoadPos* getElementSize() * getNumObservations(), false);
     if (!dataFile){
         errorLog << "Inner error reading file."<< endl << errorExit;
     }
@@ -316,9 +313,9 @@ void FileVector::writeVariableName(unsigned long varIdx, FixedChar name) {
 	if (varIdx >= fileHeader.numVariables) {
 		errorLog << "Trying to set name of obs out of range (" << varIdx << ")\n\n" << endl << errorExit;
 	}
-	if (updateNamesOnWrite||variableNames == 0){
-		indexFile.seekp(sizeof(fileHeader) + sizeof(FixedChar)*(varIdx + fileHeader.numObservations), ios::beg);
-		indexFile.write((char*)&name, sizeof(FixedChar));
+	if ((updateNamesOnWrite||variableNames == 0)&&!readOnly){
+		indexFile.fseek(sizeof(fileHeader) + sizeof(FixedChar)*(varIdx + fileHeader.numObservations));
+		indexFile.blockWriteOrRead(sizeof(FixedChar),(char*)&name, true);
 		indexFile.flush();
 	}
 	if (variableNames) {
@@ -330,9 +327,9 @@ void FileVector::writeObservationName(unsigned long obsIdx, FixedChar name) {
 	if (obsIdx >= fileHeader.numObservations) {
 		errorLog << "Trying to set name of vars out of range (" << obsIdx << ")\n\n" << endl << errorExit;
 	}
-	if (updateNamesOnWrite || observationNames == 0){
-		indexFile.seekp(sizeof(fileHeader) + sizeof(FixedChar)*(obsIdx), ios::beg);
-		indexFile.write((char*)&name, sizeof(FixedChar));
+	if ((updateNamesOnWrite || observationNames == 0)&&!readOnly){
+		indexFile.fseek(sizeof(fileHeader) + sizeof(FixedChar)*(obsIdx));
+		indexFile.blockWriteOrRead(sizeof(FixedChar),(char*)&name, true);
 		indexFile.flush();
 	}
 	if (observationNames) {
@@ -347,8 +344,8 @@ FixedChar FileVector::readVariableName(unsigned long varIdx) {
 
 	if (!variableNames) {
 		FixedChar ret;
-		indexFile.seekg(sizeof(fileHeader) + sizeof(FixedChar)*(varIdx+fileHeader.numObservations), ios::beg);
-		indexFile.read((char*)&ret, sizeof(FixedChar));
+		indexFile.fseek(sizeof(fileHeader) + sizeof(FixedChar)*(varIdx+fileHeader.numObservations));
+		indexFile.blockWriteOrRead(sizeof(FixedChar),(char*)&ret, false);
 		return ret;
 	}
 
@@ -362,8 +359,8 @@ FixedChar FileVector::readObservationName(unsigned long obsIdx) {
 
 	if (!observationNames) {
 		FixedChar ret;
-		indexFile.seekg(sizeof(fileHeader) + sizeof(FixedChar)*(obsIdx), ios::beg);
-		indexFile.read((char*)&ret, sizeof(FixedChar));
+		indexFile.fseek(sizeof(fileHeader) + sizeof(FixedChar)*(obsIdx));
+		indexFile.blockWriteOrRead( sizeof(FixedChar),(char*)&ret,false);
 		return ret;
 	}
 
@@ -408,8 +405,8 @@ void FileVector::writeVariable(unsigned long varIdx, void * datavec) {
 		errorLog << "Trying to write to the readonly file." << errorExit;
 	}
 	unsigned long pos = nrnc_to_nelem(varIdx, 0);
-	dataFile.seekp(pos*getElementSize(), ios::beg);
-	dataFile.write((char*)datavec,getElementSize()*fileHeader.numObservations);
+	dataFile.fseek(pos*getElementSize());
+	dataFile.blockWriteOrRead(getElementSize()*fileHeader.numObservations, (char*)datavec, true);
 	dataFile.flush();
 	if (!dataFile) {
 		errorLog <<"failed to write to data file\n"<<errorExit;
@@ -437,8 +434,8 @@ unsigned long FileVector::nrnc_to_nelem(unsigned long varIdx, unsigned long obsI
 void FileVector::readElement(unsigned long varIdx, unsigned long obsIdx, void* out) {
 	unsigned long pos = nrnc_to_nelem(varIdx, obsIdx);
 	deepDbg << "FileVector.readElement(" << varIdx << "," << obsIdx << "), pos = " << pos << ", ";
-	dataFile.seekg(pos*getElementSize(), ios::beg);
-	dataFile.read((char*)out,getElementSize());
+	dataFile.fseek(pos*getElementSize());
+	dataFile.blockWriteOrRead(getElementSize(), (char*)out, false);
 }
 
 void FileVector::writeElement(unsigned long varIdx, unsigned long obsIdx, void* data) {
@@ -447,8 +444,8 @@ void FileVector::writeElement(unsigned long varIdx, unsigned long obsIdx, void* 
 	}
 	deepDbg << "FileVector.writeElement(" << varIdx << "," << obsIdx << ");" << endl;
 	unsigned long pos = nrnc_to_nelem(varIdx, obsIdx);
-	dataFile.seekp(pos*getElementSize(), ios::beg);
-	dataFile.write((char*)data,getElementSize());
+	dataFile.fseek(pos*getElementSize());
+	dataFile.blockWriteOrRead(getElementSize(),(char*)data, true);
 	dataFile.flush();
 
 	if (varIdx >= cacheBegin && varIdx < cacheEnd) {
@@ -670,12 +667,12 @@ void FileVector::addVariable(void *invec, string varName) {
 		variableNames = newVariablesNames;
 		delete[] oldvar_names;
 		if (updateNamesOnWrite) {
-			indexFile.seekp(sizeof(fileHeader) + sizeof(FixedChar)*(fileHeader.numVariables - 1 + fileHeader.numObservations), ios::beg);
-			indexFile.write((char*)&_fc_varname.name, sizeof(FixedChar));
+			indexFile.fseek(sizeof(fileHeader) + sizeof(FixedChar)*(fileHeader.numVariables - 1 + fileHeader.numObservations));
+			indexFile.blockWriteOrRead(sizeof(FixedChar), (char*)&_fc_varname.name, true);
 		}
 	} else { // not loaded
-		indexFile.seekp(sizeof(fileHeader) + sizeof(FixedChar)*(fileHeader.numVariables - 1 + fileHeader.numObservations), ios::beg);
-		indexFile.write((char*)&_fc_varname.name, sizeof(FixedChar));
+		indexFile.fseek(sizeof(fileHeader) + sizeof(FixedChar)*(fileHeader.numVariables - 1 + fileHeader.numObservations));
+		indexFile.blockWriteOrRead(sizeof(FixedChar), (char*)&_fc_varname.name, true);
 	}
 	writeVariable(fileHeader.numVariables - 1, invec);
 }

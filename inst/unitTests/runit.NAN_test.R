@@ -15,6 +15,8 @@ if(FALSE) {
 
 source(paste(path,"/shared_functions.R",sep=""))
 
+quiet <- TRUE
+
 ### --- Test functions ---
 
 NA_export_import <- function(TYPE="DOUBLE",tolmult=10) 

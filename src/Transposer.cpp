@@ -7,7 +7,6 @@ advanced text tools behaviour.
 #include <cstdlib>
 #include <cstring>
 
-#include "frerror.h"
 #include "frutil.h"
 #include "FileVector.h"
 #include "Transposer.h"

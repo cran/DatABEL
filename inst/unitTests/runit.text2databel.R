@@ -15,6 +15,8 @@ if(FALSE) {
 #source("../inst/unitTests/shared_functions.R")
 source(paste(path,"/shared_functions.R",sep=""))
 
+quiet <- TRUE
+
 ### test functions
 
 test.text2databel <- function() 
@@ -44,8 +46,8 @@ test.text2databel <- function()
     a <- text2databel(infile="test_matrix_dimnames.dat",outfile="test_matrix_dimnames",R_matrix=TRUE) 
     x <- databel("test_matrix_dimnames")
     tmp <- as(x,"matrix")
-    #print(data)
-    #print(tmp)
+	if (!quiet) print(data)
+	if (!quiet) print(tmp)
     checkEquals(data,tmp)
     data <- tmp
 

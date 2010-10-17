@@ -9,7 +9,6 @@ using namespace std;
 
 #include "FileVector.h"
 #include "Transposer.h"
-#include "frerror.h"
 
 #include "convert_util.h"
 

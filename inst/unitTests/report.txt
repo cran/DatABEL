@@ -1,12 +1,12 @@
-RUNIT TEST PROTOCOL -- Fri Aug  6 20:04:04 2010 
+RUNIT TEST PROTOCOL -- Wed Oct 20 12:18:54 2010 
 *********************************************** 
-Number of test functions: 12 
+Number of test functions: 13 
 Number of errors: 0 
 Number of failures: 0 
 
  
 1 Test Suite : 
-DatABEL unit testing - 12 test functions, 0 errors, 0 failures
+DatABEL unit testing - 13 test functions, 0 errors, 0 failures
 
 
 
@@ -19,27 +19,30 @@ Involved directory:
 /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests 
 --------------------------- 
 Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.NAN_test.R 
-test.NA_export_import: (8 checks) ... OK (4.1 seconds)
-test.NA_string: (5 checks) ... OK (0.06 seconds)
+test.NA_export_import: (8 checks) ... OK (6.61 seconds)
+test.NA_string: (5 checks) ... OK (0.05 seconds)
 test.NA_test: (8 checks) ... OK (0.87 seconds)
 --------------------------- 
 Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.apply2dfo.R 
-test.apply2dfo: (8 checks) ... OK (43.46 seconds)
+test.apply2dfo: (8 checks) ... OK (22.91 seconds)
 --------------------------- 
 Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.databel_class.R 
-test.databel_class: (69 checks) ... OK (49.31 seconds)
-test.databel_class_setReadOnly: (7 checks) ... OK (1.51 seconds)
+test.databel_class: (69 checks) ... OK (9.14 seconds)
+test.databel_class_setReadOnly: (7 checks) ... OK (0.78 seconds)
 --------------------------- 
 Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.generate_and_read_small_files.R 
-test.as.databel: (58 checks) ... OK (35.77 seconds)
-test.save_as: (18 checks) ... OK (10.32 seconds)
+test.as.databel: (58 checks) ... OK (28.81 seconds)
+test.save_as: (18 checks) ... OK (10.84 seconds)
 --------------------------- 
 Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.iterator.R 
 test.empty: (0 checks) ... OK (0 seconds)
-test.iterator: (8 checks) ... OK (0.07 seconds)
+test.iterator: (8 checks) ... OK (0.06 seconds)
+--------------------------- 
+Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.many_objects.R 
+test.many_objects: (1792 checks) ... OK (350.13 seconds)
 --------------------------- 
 Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.read_large_file.R 
-test.databel_large_file_reads: (165 checks) ... OK (90.95 seconds)
+test.databel_large_file_reads: (165 checks) ... OK (120.7 seconds)
 --------------------------- 
 Test file: /Users/yuriiaulchenko/eclipse_workspace/DatABEL/tests/../inst/unitTests/runit.text2databel.R 
-test.text2databel: (19 checks) ... OK (2.1 seconds)
+test.text2databel: (19 checks) ... OK (10.9 seconds)

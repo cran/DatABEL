@@ -7,7 +7,6 @@
 #include <fstream>
 #include <vector>
 
-#include "frerror.h"
 #include "const.h"
 #include "Logger.h"
 #include "CastUtils.h"

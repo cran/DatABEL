@@ -16,6 +16,8 @@ if(FALSE) {
 #source("../inst/unitTests/shared_functions.R")
 source(paste(path,"/shared_functions.R",sep=""))
 
+quiet <- TRUE
+
 ### --- Test functions ---
 
 #
@@ -33,17 +35,17 @@ test.as.databel <- function()
 
     testmatr <- make_matrix_of_type_with_NA()
     test_fv <- as(testmatr,"databel")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
     disconnect(test_fv)
     connect(test_fv)
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
     
 
     test_fv <- matrix2databel(testmatr,file="tmp",type="DOUBLE")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
     disconnect(test_fv)
     connect(test_fv)
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
     
 
     # try to ini using the same name
@@ -53,28 +55,28 @@ test.as.databel <- function()
     rm(test_fv);gc()
     unlink("tmp*")
 
-    print("A4");
+	if (!quiet) print("A4");
 
     #define UNSIGNED_SHORT_INT 1
     testmatr <- make_matrix_of_type_with_NA("UNSIGNED_SHORT_INT")
     test_fv <- as(testmatr,"databel")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
 
     test_fv <- matrix2databel(testmatr,file="tmp",type="UNSIGNED_SHORT_INT")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
 
     rm(test_fv,testmatr);gc()
     unlink("tmp*")
 
-    print("A5");
+	if (!quiet) print("A5");
 
     #define SHORT_INT          2
 	testmatr <- make_matrix_of_type_with_NA("SHORT_INT")
 	test_fv <- as(testmatr,"databel")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
 
     test_fv <- matrix2databel(testmatr,file="tmp",type="SHORT_INT")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
 
     rm(test_fv,testmatr);
     gc()
@@ -84,24 +86,24 @@ test.as.databel <- function()
     #define UNSIGNED_INT       3
     testmatr <- make_matrix_of_type_with_NA("UNSIGNED_INT")
     test_fv <- as(testmatr,"databel")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
 
 
     test_fv <- matrix2databel(testmatr,file="tmp",type="UNSIGNED_INT")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
     
     rm(test_fv,testmatr);gc()
     unlink("tmp*")
 
-    print("A7");
+	if (!quiet) print("A7");
 
     #define INT                4
     testmatr <- make_matrix_of_type_with_NA("INT")
     test_fv <- as(testmatr,"databel")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
     
     test_fv <- matrix2databel(testmatr,file="tmp",type="INT")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
     
     rm(test_fv,testmatr);gc()
     unlink("tmp*")
@@ -109,10 +111,10 @@ test.as.databel <- function()
     #define FLOAT              5
     testmatr <- make_matrix_of_type_with_NA("FLOAT")
     test_fv <- as(testmatr,"databel")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
 	
     test_fv <- matrix2databel(testmatr,file="tmp",type="FLOAT")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
     
     rm(test_fv,testmatr);gc()
     unlink("tmp*")
@@ -120,27 +122,27 @@ test.as.databel <- function()
     #define DOUBLE             6
     testmatr <- make_matrix_of_type_with_NA("DOUBLE")
     test_fv <- as(testmatr,"databel")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
 
     test_fv <- matrix2databel(testmatr,file="tmp",type="DOUBLE")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
     rm(test_fv);gc()
     unlink("tmp*")
 
     #define CHAR              7
     testmatr <- make_matrix_of_type_with_NA("CHAR")
     test_fv <- as(testmatr,"databel")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
 
     test_fv <- matrix2databel(testmatr,file="tmp",type="CHAR")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
     rm(test_fv);gc()
     unlink("tmp*")
 
     #define UNSIGNED_CHAR            8
     testmatr <- make_matrix_of_type_with_NA("UNSIGNED_CHAR")
     test_fv <- as(testmatr,"databel")
-    checkNumEq(testmatr,test_fv)
+    checkNumEq(testmatr,test_fv,quiet=quiet)
 
 
     rm(test_fv,testmatr);gc()
@@ -157,39 +159,39 @@ test.save_as <- function()
 
     unlink("tmp*")
     testmatr <- make_matrix_of_type_with_NA(range_data=c(-1000,1000))
-#    print(testmatr)
+	if (!quiet) print(testmatr)
     dba <- matrix2databel(testmatr,file="tmp")
     dfa <- as(dba,"databel")
-#    print(as.matrix(dba))
-    checkNumEq(testmatr,dba)
-#    print(as(dfa,"matrix"))
-    checkNumEq(testmatr,dfa)
+	if (!quiet) print(as.matrix(dba))
+    checkNumEq(testmatr,dba,quiet=quiet)
+	if (!quiet) print(as(dfa,"matrix"))
+    checkNumEq(testmatr,dfa,quiet=quiet)
     
     dims <- dim(testmatr)
     subrows <- sample(1:dims[1],2+floor(runif(1,min=(dims[1]-3)/10,max=(dims[1]-3))))
     subcols <- sample(1:dims[2],2+floor(runif(1,min=(dims[2]-3)/10,max=(dims[2]-3))))
     sub_tm <- testmatr[subrows,subcols]
-#    print(subrows)
-#    print(subcols)
-#    print(sub_tm)
+	if (!quiet) print(subrows)
+	if (!quiet) print(subcols)
+	if (!quiet) print(sub_tm)
     sub_dba <- save_as(dba[subrows,subcols],file="tmp_sub_1")
-    checkNumEq(sub_tm,sub_dba)
+    checkNumEq(sub_tm,sub_dba,quiet=quiet)
     sub_dba <- save_as(dba,row=subrows,col=subcols,file="tmp_sub_2")
-#    print(as.matrix(sub_dba))
-#    print(as.matrix(as(sub_dba,"databel_filtered_R")))
-    checkNumEq(sub_tm,sub_dba)
+	if (!quiet) print(as.matrix(sub_dba))
+	if (!quiet) print(as.matrix(as(sub_dba,"databel_filtered_R")))
+    checkNumEq(sub_tm,sub_dba,quiet=quiet)
     
     sub_dfa <- save_as(dfa[subrows,subcols],file="tmp_dfa_sub")
-#    print(sub_tm)
-#    print(as(dfa[subrows,subcols],"matrix"))
-#    print(as(sub_dfa,"matrix"))
-    checkNumEq(sub_tm,as(sub_dfa,"matrix"))    
+	if (!quiet) print(sub_tm)
+	if (!quiet) print(as(dfa[subrows,subcols],"matrix"))
+	if (!quiet) print(as(sub_dfa,"matrix"))
+    checkNumEq(sub_tm,as(sub_dfa,"matrix"),quiet=quiet)    
     
     sub_dfa <- save_as(dfa,row=subrows,col=subcols,file="tmp_dfa_sub1")
-#    print(sub_tm)
-#    print(as(dfa[subrows,subcols],"matrix"))
-#    print(as(sub_dfa,"matrix"))
-    checkNumEq(sub_tm,as(sub_dfa,"matrix"))
+	if (!quiet) print(sub_tm)
+	if (!quiet) print(as(dfa[subrows,subcols],"matrix"))
+	if (!quiet) print(as(sub_dfa,"matrix"))
+    checkNumEq(sub_tm,as(sub_dfa,"matrix"),quiet=quiet)
 	
 	rm(list=ls());gc()
     

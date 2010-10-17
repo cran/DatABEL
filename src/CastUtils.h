@@ -37,7 +37,7 @@ extern unsigned char UNSIGNED_CHAR_NAN;
 
 #define COPY_AND_COMPARE(dest,src,warningIsShown)                                                 \
  dest=src;                                                                                        \
- if(warningIsShown == false && dest!=src || checkNan(dest) != checkNan(src))                      \
+ if(warningIsShown == false && (dest!=src || checkNan(dest) != checkNan(src)))                    \
  {                                                                                                \
     errorLog << "Loss of precision / loss of data during conversion from ";                       \
     errorLog << dataTypeToString(getDataType(src)) << " to ";                                     \

@@ -16,6 +16,8 @@ if(FALSE) {
 #source("../inst/unitTests/shared_functions.R")
 source(paste(path,"/shared_functions.R",sep=""))
 
+quiet <- TRUE 
+
 ### --- Test functions ---
 
 #
@@ -36,47 +38,47 @@ test.databel_class <- function()
 #	dta <- make_random_matrix(range_data=c(-10,10))
 	dta <- make_matrix_of_type_with_NA()
 	null <- as(dta,"databel")
-    checkNumEq(dta,null)
+    checkNumEq(dta,null,quiet=quiet)
     checkIdentical("databel",class(null)[1])
     x <- null
     checkIdentical("databel",class(x)[1])
-    checkNumEq(dta,x)
+    checkNumEq(dta,x,quiet=quiet)
     x1 <- x
     checkIdentical(as(x,"matrix"),as(null,"matrix"))
-    checkNumEq(dta,x1)
+    checkNumEq(dta,x1,quiet=quiet)
     disconnect(x)
-	checkNumEq(dta,null)
-	checkNumEq(dta,x1)
+	checkNumEq(dta,null,quiet=quiet)
+	checkNumEq(dta,x1,quiet=quiet)
 	connect(x)
     checkIdentical("databel",class(x)[1])
-    checkNumEq(dta,x)
+    checkNumEq(dta,x,quiet=quiet)
     rm(null);gc()
-    checkNumEq(dta,x)
+    checkNumEq(dta,x,quiet=quiet)
     rm(x1);gc()
     x1 <- x[]
     disconnect(x)
-    checkNumEq(dta,x1)
+    checkNumEq(dta,x1,quiet=quiet)
     connect(x)
     rm(x1);gc()
     x1 <- x
     disconnect(x)
-    checkNumEq(dta,x1)
+    checkNumEq(dta,x1,quiet=quiet)
     connect(x)
     rm(x1);gc()
     x1 <- x
     rm(x);gc()
-    checkNumEq(dta,x1)
+    checkNumEq(dta,x1,quiet=quiet)
     rm(x1);gc()
     
     x <- as(dta,"databel")
     checkIdentical("databel",class(x)[1])
-    checkNumEq(dta,x)
+    checkNumEq(dta,x,quiet=quiet)
     disconnect(x)
     connect(x)
     checkIdentical("databel",class(x)[1])
-    checkNumEq(dta,x)
+    checkNumEq(dta,x,quiet=quiet)
     x1 <- x
-    checkNumEq(dta,x1)
+    checkNumEq(dta,x1,quiet=quiet)
     
     
     # make identical
@@ -91,14 +93,14 @@ test.databel_class <- function()
     
     dta1 <- dta[rRow,rCol,drop=FALSE]
     x1 <- x[rRow,rCol]
-    checkNumEq(dta1,x1)
+    checkNumEq(dta1,x1,quiet=quiet)
     disconnect(x1)
-    checkNumEq(dta1,x1)
+    checkNumEq(dta1,x1,quiet=quiet)
     connect(x1)
 	
     dta1 <- dta[sort(rRow),sort(rCol),drop=FALSE]
     x1 <- x[sort(rRow),sort(rCol)]
-    checkNumEq(dta1,x1)
+    checkNumEq(dta1,x1,quiet=quiet)
     
     rCol <- sample(1:ncol(x1),ceiling(ncol(x)/10))
     rCol
@@ -107,7 +109,7 @@ test.databel_class <- function()
     
     dta2 <- dta1[rRow,rCol,drop=FALSE]
     x2 <- x1[rRow,rCol]
-    checkNumEq(dta2,x2)
+    checkNumEq(dta2,x2,quiet=quiet)
     
     logCol <- (runif(ncol(dta))<=0.1)
     while (!any(logCol)) logCol <- (runif(ncol(dta))<=0.1)
@@ -120,7 +122,7 @@ test.databel_class <- function()
     x1 <- x[logRow,logCol,drop=FALSE]
 ### would fail with checkIdentical
 #    checkIdentical(dta1,as(x1,"matrix"))
-    checkNumEq(dta1,x1)
+    checkNumEq(dta1,x1,quiet=quiet)
     
     logCol <- (runif(ncol(dta1))<=0.1)
     while (!any(logCol)) logCol <- (runif(ncol(dta1))<=0.1)
@@ -133,14 +135,14 @@ test.databel_class <- function()
     x2 <- x1[logRow,logCol]
 ### would fail with checkIdentical
 #	checkIdentical(dta2,as(x2,"matrix"))
-    checkNumEq(dta2,x2)
+    checkNumEq(dta2,x2,quiet=quiet)
 
     dta1 <- dta[c(T,F,F,F,F),c(F,F,F,F,T),drop=FALSE]
     dim(x)
     x1 <- x[c(T,F,F,F,F),c(F,F,F,F,T)]
 ### would fail with checkIdentical
 #    checkIdentical(dta1,as(x1,"matrix"))
-    checkNumEq(dta1,x1)
+    checkNumEq(dta1,x1,quiet=quiet)
 
 # submatrix and permute
 # on integer 
@@ -161,7 +163,7 @@ test.databel_class <- function()
     x1
 ### would fail with checkIdentical
 #    checkIdentical(dta1,as(x1,"matrix"))
-    checkNumEq(dta1,x1)
+    checkNumEq(dta1,x1,quiet=quiet)
 	
 	rm(list=ls());gc()
     
@@ -179,7 +181,7 @@ test.databel_class_setReadOnly <- function()
 	
 	dta <- make_matrix_of_type_with_NA()
 	dfo <- as(dta,"databel")
-	checkNumEq(dta,dfo)
+	checkNumEq(dta,dfo,quiet=quiet)
 	
 	dfo[1,1] <- 11
 	checkEquals(11,as(dfo[1,1],"vector"))

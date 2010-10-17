@@ -17,8 +17,8 @@
 
 #include "Logger.h"
 #include "frutil.h"
-#include "frerror.h"
 
+#include "ReusableFileHandle.h"
 #include "AbstractMatrix.h"
 
 using namespace std;
@@ -32,8 +32,8 @@ private:
     const string filename;
 	string dataFilename;
     string indexFilename;
-	fstream dataFile;
-	fstream indexFile;
+	ReusableFileHandle dataFile;
+	ReusableFileHandle indexFile;
 	FileHeader fileHeader;
 	// row and column names
 	FixedChar *variableNames;
@@ -75,7 +75,6 @@ public:
 	FileVector(char *iFilename, unsigned long cachesizeMb) : filename(string(iFilename)){
 		updateNamesOnWrite = false;
 		readOnly = false;
-		string filename(iFilename);
 		cacheBuffer = 0;
 		initialize(cachesizeMb);
 		getWarningIsShown() = false;

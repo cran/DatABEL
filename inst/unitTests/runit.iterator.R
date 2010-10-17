@@ -15,7 +15,8 @@ test.empty <- function(){}
 
 source(paste(path,"/shared_functions.R",sep=""))
 source(paste(path,"/mytest_iterator.R",sep=""))
-
+quiet <- TRUE 
+	
 ### --- Test functions ---
 
 test.iterator <- function()

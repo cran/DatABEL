@@ -17,12 +17,13 @@ unsigned char UNSIGNED_CHAR_NAN;
 char const* parseFormats[9];
 
 int initConsts(){
+  int i;
   sscanf("32767","%hi",&SHORT_INT_NAN);
   sscanf("65535","%hu",&UNSIGNED_SHORT_INT_NAN);
   sscanf("2147483647","%i",&INT_NAN);
   sscanf("4294967295","%u",&UNSIGNED_INT_NAN);
-  sscanf("127","%i",&CHAR_NAN);
-  sscanf("255","%u",&UNSIGNED_CHAR_NAN);
+  sscanf("127","%i",&i); CHAR_NAN = i;
+  sscanf("255","%u",&i); UNSIGNED_CHAR_NAN = i;
 
   parseFormats[UNSIGNED_SHORT_INT] = "%hu";
   parseFormats[SHORT_INT] = "%hd";
@@ -32,6 +33,7 @@ int initConsts(){
   parseFormats[DOUBLE] = "%lf";
   parseFormats[SIGNED_CHAR] = "%i";
   parseFormats[UNSIGNED_CHAR] = "%i";
+  return 0;
 }
 
 int dummy = initConsts();
@@ -86,7 +88,7 @@ string dataTypeToString(int type){
 }
 
 string bufToString(short int dataType, char *data, string nanString){
-	char ret[20];
+	char ret[500];
 	switch(dataType){
 	case UNSIGNED_SHORT_INT:
 		sprintf(ret, "%hu", *(unsigned short int*)data);
@@ -191,6 +193,7 @@ bool checkNan(void *data, int dataType){
     	    return (*(char*) data) == CHAR_NAN;
     	default:
     		errorLog << "file contains data of unknown type " << dataType << endl << errorExit;
+    		return false;
    }
 }
 

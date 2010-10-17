@@ -3,11 +3,12 @@
 
 #include <Rdefines.h>
 
+#define error_R Rprintf("ERROR in Rstaff:"); Rprintf
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void error_R (const char * format, ... );
 SEXP extract_text_file_column_cpp(SEXP, SEXP);
 
 #ifdef __cplusplus

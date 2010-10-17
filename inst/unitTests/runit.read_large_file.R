@@ -12,6 +12,8 @@ if(FALSE) {
 
 # common functions and data
 
+quiet <- TRUE
+
 data_prefix = "big_data/ERF.merlin.22.collected.ped.out.mldose"
 
 databel_large_file_reads <- function(fv_data)
@@ -76,8 +78,8 @@ databel_large_file_reads <- function(fv_data)
 test.databel_large_file_reads <- function()
 {
     
-    library("RUnit")
-    library("DatABEL")
+    #library("RUnit")
+    #library("DatABEL")
     
     ## try to read from non-existing file
     checkException(databel("no_such_file"))
@@ -88,12 +90,12 @@ test.databel_large_file_reads <- function()
     
     # cann I read from base file name, *.fvi, *fvd?
     tmpname1 <- paste(data_prefix,".fvi",sep="")
-    print(tmpname1)
+	if (!quiet) print(tmpname1)
 #    if (file.exists(tmpname1)) {
 #        fv_data <- databel(tmpname1)
 #    }
     tmpname2 <- paste(data_prefix,".fvd",sep="")
-    print(tmpname2)
+	if (!quiet) print(tmpname2)
 #    if (file.exists(tmpname2)) {
 #        fv_data <- databel(tmpname2)
 #    }
@@ -122,14 +124,14 @@ test.databel_large_file_reads <- function()
     
     # test reading with different chache size
     databel_large_file_reads(fv_data)
-    print(fv_data)
+	if (!quiet) print(fv_data)
     checkException(cachesizeMb(fv_data) <- "aaa")
     checkException(cachesizeMb(fv_data) <- -1)
     cachesizeMb(fv_data) <- 0
     checkTrue(cachesizeMb(fv_data)>0)
     databel_large_file_reads(fv_data)
     cachesizeMb(fv_data) <- 4
-    print(cachesizeMb(fv_data))
+	if (!quiet) print(cachesizeMb(fv_data))
     checkEquals(4,cachesizeMb(fv_data))
     cachesizeMb(fv_data) <- 180
     checkEquals(180,cachesizeMb(fv_data))

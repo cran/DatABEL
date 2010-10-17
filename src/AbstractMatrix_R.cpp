@@ -621,7 +621,7 @@ extern "C" {
 
 		unsigned long dir = (unsigned long) INTEGER(direction)[0];
 
-        double *currentValues;
+        double *currentValues = 0;
         if (!(coeff < WRITE_SPEED_PROPORTION)) {
             currentValues = new double[p->getNumObservations()];
         }

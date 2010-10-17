@@ -1,3 +1,16 @@
+**** v. 0.9-2 (2010.10.17)
+
+added web version-check on load
+
+**** v. 0.9-1 (2010.09.14)
+
+fix of minor bugs leading to matrix2databel always operating in RW mode
+
+changes in 'filevector' allowing for re-use of file handles; this allows 
+DatABEL creating arbitrary many 'databel' objects (before limited to 
+few hundreds) when the number of underlying files is less then few 
+hundreds. 
+
 **** v. 0.9-0 (2010.08.04)
 
 Beta version at the manuscript pre-submission time

@@ -26,7 +26,8 @@ object is bond to the outfile}
 tyoe to use for storage}
 \item{transpose}{whether to transpose the output}
 \item{...}{arguments passed to the anFUN}}
-\examples{a <- matrix(rnorm(50),10,5)
+\examples{unlink("tmp*")
+a <- matrix(rnorm(50),10,5)
 rownames(a) <- paste("id",1:10,sep="")
 colnames(a) <- paste("snp",1:5,sep="")
 b <- as(a,"databel")
@@ -49,4 +50,7 @@ as(tC,"matrix")
 apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",transpose=FALSE)
 tD <- apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",transpose=FALSE,outclass="databel",outfile="tmpD")
 tD
-as(tD,"matrix")}
+as(tD,"matrix")
+rm(tA,tB,tC,tD)
+gc()
+unlink("tmp*")}

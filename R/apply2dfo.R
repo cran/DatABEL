@@ -23,6 +23,11 @@
 #' tyoe to use for storage
 #' @param transpose whether to transpose the output
 #' @param ... arguments passed to the anFUN
+#'
+#' @return A matrix (or 'databel'-matrix) containing results of 
+#' applying the function  
+#' 
+#' @author Yurii Aulchenko
 #' 
 #' @examples 
 #' a <- matrix(rnorm(50),10,5)
@@ -49,6 +54,9 @@
 #' tD <- apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",transpose=FALSE,outclass="databel",outfile="tmpD")
 #' tD
 #' as(tD,"matrix")
+#' rm(tA,tB,tC,tD)
+#' gc()
+#' unlink("tmp*")
 #' 
 
 

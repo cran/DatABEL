@@ -10,17 +10,6 @@
 extern "C" {
 #endif
 
-	void error_R (const char * format, ... )
-	{
-		va_list args;
-		char buffer[256];
-		va_start(args, format);
-		vsprintf(buffer, format, args);
-		va_end(args);
-		Rprintf("ERROR in Rstaff: %s",buffer);
-	}
-
-
 	SEXP extract_text_file_column_cpp(SEXP Filename, SEXP Whichcol)
 	{
 		std::string filename = CHAR(STRING_ELT(Filename,0));
