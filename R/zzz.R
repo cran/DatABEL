@@ -4,6 +4,7 @@
   welcomeMessage <- paste(pkg, " v.", pkgVersion,
                           " (", pkgDate, ") loaded\n", sep="")
 
+  if(FALSE) {
   ## check if CRAN version is the same as loaded
   cranVersion <- try( checkPackageVersionOnCRAN(pkg) )
   if (!is.null(cranVersion) & !( class(cranVersion) == "try-error") )
@@ -18,8 +19,9 @@
                               "\")', or ask your system administrator\n",
                               "to update the package.\n\n", sep="")
     }
-
-  ## check for news
+  
+  }
+## check for news
   address <- c(
     "http://genabel.r-forge.r-project.org/version_and_news.html",
     "http://www.genabel.org/sites/default/files/version_and_news.html"

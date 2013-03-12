@@ -1,5 +1,5 @@
 84d0b5d2ccc8ea3faad3cda3b42f84b3 *CHANGES.LOG
-760af3bdaeb1982f352f9630367a77ec *DESCRIPTION
+424e5226e959ef2e72ec9f4ce494f11c *DESCRIPTION
 f6bfa8ea7e002d2e8b26f422cb398981 *NAMESPACE
 679d68f30dedb64ee5bc09eef35f9649 *R/DatABEL-package.R
 994899624c4aca92b59d37caeeb04f27 *R/apply2dfo.R
@@ -16,7 +16,7 @@ a6c61f4b2e9fecc627322a5b5e61ed1f *R/get_temporary_file_name.R
 832f7ff201e60497c65655184b86c7bf *R/make_empty_fvf.R
 62d9fb9be15f975bd824f8a340e271bb *R/matrix2databel.R
 f3efef8ef6ed53ffe7401b6bd33dfd59 *R/text2databel.R
-1b6996bdb2eea422e63c9309ca04d725 *R/zzz.R
+c41a26c448e37b10e1ddf1779c9520d2 *R/zzz.R
 d41d8cd98f00b204e9800998ecf8427e *TODO
 c17982566e6ce83fec7fa0990fdc5add *inst/doc/intro_DatABEL.Rnw
 6b333a5d7ade1a4f2f7397e9f254895d *inst/doc/intro_DatABEL.pdf
@@ -36,7 +36,7 @@ e311e7b885455b7ca0ee2c3da887aef9 *inst/unitTests/runit.text2databel.R
 445ad74963a27f083bce776c426d26b2 *inst/unitTests/shared_functions.R
 3f00bf95646e56114f2677e05cd01f1d *man/DatABEL-internal.Rd
 ca8e167f01b1e27eae009e5aefc7f98a *man/DatABEL-package.Rd
-98dc763e3832baa8d5e839ced880ea05 *man/apply2dfo.Rd
+937cb770c441c4f0a95e58449714daff *man/apply2dfo.Rd
 ac6bc0a3ceae04791ae33f6a6321cba1 *man/databel-class.Rd
 3786542b2003218f2f34b043298f4336 *man/databel.Rd
 cec9e4fbce7112c29e3c6a2e8a5d7314 *man/databel2matrix.Rd
@@ -46,7 +46,7 @@ cec9e4fbce7112c29e3c6a2e8a5d7314 *man/databel2matrix.Rd
 5d11f6723d27def40910402cd803a167 *man/make_empty_fvf.Rd
 76c24b6ff5120b205ef4061d9eb07ad7 *man/matrix2databel.Rd
 c3a14869ea5f83aa083eb2146830a498 *man/process_lm_output.Rd
-61b56527d0f40424f75f8a1a63279e9a *man/text2databel.Rd
+404bd1269940fc95569d218af77e6c76 *man/text2databel.Rd
 7124a43b22885e483a6d0a844ed4b647 *src/AbstractMatrix.cpp
 86989e0ba0d464701cb545f77ba93360 *src/AbstractMatrix.h
 7923b58d463bc35f1b91a15b18addfb2 *src/AbstractMatrix_R.cpp

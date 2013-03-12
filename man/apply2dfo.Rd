@@ -61,11 +61,13 @@ as(tB,"matrix")
 sex <- 1*(runif(10)>.5)
 trait <- rnorm(10)+sex+as(b[,2],"vector")+as(b[,2],"vector")*sex*5
 apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm")
-tC <- apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",outclass="databel",outfile="tmpC")
+tC <- apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",
+                outclass="databel",outfile="tmpC")
 tC
 as(tC,"matrix")
 apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",transpose=FALSE)
-tD <- apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",transpose=FALSE,outclass="databel",outfile="tmpD")
+tD <- apply2dfo(trait~SNP*sex,dfodata=b,anFUN="lm",transpose=FALSE,
+                outclass="databel",outfile="tmpD")
 tD
 as(tD,"matrix")
 rm(tA,tB,tC,tD)

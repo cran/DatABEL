@@ -103,22 +103,22 @@ data
 # convert text two filevector format
 
 text2databel(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames.fvf",
-					colnames="test_matrix.colnames",rownames="test_matrix.rownames")
+		colnames="test_matrix.colnames",rownames="test_matrix.rownames")
 x <- databel("test_matrix_NOnames.fvf")
 if (!identical(data,as(x,"matrix"))) stop("not identical data")
 
 text2databel(infile="test_matrix_NOnames.dat",outfile="test_matrix_NOnames_T.fvf",
-					colnames="test_matrix.colnames",rownames="test_matrix.rownames",transpose=TRUE)
+		colnames="test_matrix.colnames",rownames="test_matrix.rownames",transpose=TRUE)
 x <- databel("test_matrix_NOnames_T.fvf")
 if (!identical(data,t(as(x,"matrix")))) stop("not identical data")
 
 text2databel(infile="test_matrix_rownames.dat",outfile="test_matrix_rownames.fvf",
-					rownames=1,colnames="test_matrix.colnames")
+		rownames=1,colnames="test_matrix.colnames")
 x <- databel("test_matrix_rownames.fvf")
 if (!identical(data,as(x,"matrix"))) stop("not identical data")
 
 text2databel(infile="test_matrix_colnames.dat",outfile="test_matrix_colnames.fvf",
-					colnames=1,rownames="test_matrix.rownames")
+		colnames=1,rownames="test_matrix.rownames")
 x <- databel("test_matrix_colnames.fvf")
 if (!identical(data,as(x,"matrix"))) stop("not identical data")
 
