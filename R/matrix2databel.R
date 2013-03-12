@@ -18,8 +18,12 @@
 
 matrix2databel <- function(from, filename, cachesizeMb = 64, type = "DOUBLE", readonly = FALSE) {
 # a bit dirty
-	to <- make_empty_fvf(as.character(filename),nvar=dim(from)[2],nobs=dim(from)[1],
-			type=type,readonly=FALSE,cachesizeMb=cachesizeMb)
+	to <- make_empty_fvf(as.character(filename),
+                             nvariables=dim(from)[2],
+                             nobservations=dim(from)[1],
+                             type=type,
+                             readonly=FALSE,
+                             cachesizeMb=cachesizeMb)
 	to[] <- from
 	matrix_dimnames <- dimnames(from)
 	if (!is.null(matrix_dimnames)) set_dimnames(to) <- matrix_dimnames

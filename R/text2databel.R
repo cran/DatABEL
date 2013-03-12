@@ -14,8 +14,8 @@
 #' option is provided, it is assumed that both column and row 
 #' names are provided in the file, and the first line contains 
 #' one column less than other lines (such is the case with 
-#' file produced from R using function 
-#' "write.table(...,col.mnames=TRUE,row.names=TRUE)" 
+#' files produced from R using the function 
+#' \code{write.table(...,col.names=TRUE,row.names=TRUE)}.
 #' 
 #' @param infile input text file name
 #' @param outfile output filevector file name; if missing, 
@@ -35,7 +35,7 @@
 #' @param transpose whether the file is to be transposed
 #' @param  R_matrix if true, the file format is assumed to follow 
 #' the format of R data matrix produced with 
-#' "write.table(...,col.mnames=TRUE,row.names=TRUE)"
+#' \code{write.table(...,col.names=TRUE,row.names=TRUE)}
 #' @param type data DatABEL type to use ("DOUBLE", "FLOAT", "INT", 
 #' "UNSIGNED_INT", "UNSIGNED_SHORT_INT", "SHORT_INT", "CHAR", "UNSIGNED_CHAR")
 #' @param cachesizeMb cache size for the resulting 'databel-class' object
@@ -45,8 +45,8 @@
 #' 
 #' @author  Yurii Aulchenko
 #' 
-#' @return file converted is stored in file system, \link{databel-class} 
-#' object connection to the file
+#' @return The converted file is stored in the file system, a \link{databel-class} 
+#' object connection to the file is returned.
 #' 
 #' @examples 
 #' 

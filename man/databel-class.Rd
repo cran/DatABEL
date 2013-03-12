@@ -2,6 +2,8 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{databel-class}
+\alias{[-methods}
+\alias{[,databel,ANY,ANY,ANY-method}
 \alias{[,databel-method}
 \alias{[<-,databel-method}
 \alias{connect,databel-method}
@@ -96,7 +98,7 @@ FILEVECTOR data are stored using files of form BASE.fvi (index) and BASE.fvd (da
 	 }
 }
 
-\references{\url{http://mga.bionet.nsc.ru/~yurii/ABEL/}}
+\references{\url{http://www.genabel.org/packages/DatABEL}}
 
 \author{Yurii Aulchenko, Stepan Yakovenko, Andrey Chernyh}
 

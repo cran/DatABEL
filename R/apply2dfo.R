@@ -103,9 +103,17 @@ apply2dfo <- function(..., dfodata,anFUN="lm",MAR=2,procFUN,
 		if (missing(outfile)) stop("outfile argument must be provided with outcalss=='databel'")
 		# no good -- fast access in wrong direction
 		if (transpose)
-			res <- make_empty_fvf(outfile,nvar=dimout[2],nobs=(dimout[1])*(dim(dfodata)[MAR]),type=type, readonly=FALSE)
+			res <- make_empty_fvf(outfile,
+                                              nvariables=dimout[2],
+                                              nobservations=(dimout[1])*(dim(dfodata)[MAR]),
+                                              type=type,
+                                              readonly=FALSE)
 		else 
-			res <- make_empty_fvf(outfile,nobs=dimout[2],nvar=(dimout[1])*(dim(dfodata)[MAR]),type=type, readonly=FALSE)
+			res <- make_empty_fvf(outfile,
+                                              nobservations=dimout[2],
+                                              nvariables=(dimout[1])*(dim(dfodata)[MAR]),
+                                              type=type,
+                                              readonly=FALSE)
 	}
 	else stop("outclass must be 'matrix' or 'databel'")
 #print(c("aaA",dim(res),class(res)))

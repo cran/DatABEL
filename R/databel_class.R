@@ -1,3 +1,24 @@
+#' DatABEL class
+#' 
+#' @section Slots: 
+#'  \describe{
+#'    \item{\code{usedRowIndex}:}{\code{"integer"}}
+#'    \item{\code{usedColIndex}:}{\code{"integer"}}
+#'    \item{\code{uninames}:}{\code{"list"}}
+#'    \item{\code{backingfilename}:}{\code{"character"}}
+#'    \item{\code{cachesizeMb}:}{\code{"integer"}}
+#'    \item{\code{data}:}{\code{"externalptr"}}
+#'  }
+#'
+#' @note Will extend description here
+#' @docType methods
+#' @name databel
+#' @rdname databel-class
+#' @aliases databel-class
+#' @exportClass databel
+#' @author Yurii Aulchenko
+#' '
+
 #
 # databel  R class
 # (C) 2009, 2010, Yurii Aulchenko, EMCR
@@ -535,11 +556,14 @@ setMethod(
 		}
 );
 
+#' setReadOnly method
+#'
+#' @docType methods
+#' @rdname setReadOnly-method
 setGeneric(
 		name = "setReadOnly<-",
 		def = function(x,value) {standardGeneric("setReadOnly<-");}
 );
-
 
 setMethod(
 		f = "setReadOnly<-",

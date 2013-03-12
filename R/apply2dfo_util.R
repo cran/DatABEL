@@ -13,14 +13,9 @@
 #' @aliases process_lm_output process_simple_output sum_not_NA sum_NA
 #' 
 #' @usage process_lm_output(lmo,verbosity=2) 
-#' process_simple_output(o) 
-#' sum_not_NA(x) 
-#' sum_NA(x)
 #' 
 #' @param lmo object returned by analysis with "lm", "glm", etc.
 #' @param verbosity verbosity
-#' @param o output for processing
-#' @param x vector of data on which function is applied
 #' 
 #' @seealso \link{apply2dfo}
 #' 

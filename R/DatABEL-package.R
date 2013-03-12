@@ -15,7 +15,10 @@
 #' \code{\link{text2databel}},
 #' \code{\linkS4class{databel}}
 #' 
+#' @docType package
+#' @name DatABEL-package
+#' @aliases "DatABEL"
+#' 
 #' @author Yurii Aulchenko (R code), Stepan Yakovenko (R and C++ code), Andrey Chernyh (C++ code)
 #' 
-
-"DatABEL-package" <- function(){}
+NA
