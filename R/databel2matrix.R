@@ -11,6 +11,7 @@
 #' @return object of \code{\linkS4class{matrix}} class
 #'
 #' @author Stepan Yakovenko
+#' @export
 #'
 
 databel2matrix <- function(from, rows, cols) {

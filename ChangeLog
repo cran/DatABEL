@@ -1,3 +1,8 @@
+**** v. 0.9-5
+
+- Fixed bug #1126: Using mach2databel() or impute2mach() to convert files
+  to the filevector format leaves fvtmp filles behind (Lennart)
+
 **** v. 0.9-4 (2013.03.12)
 
 - Fixing warning messages (Lennart)
