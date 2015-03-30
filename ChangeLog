@@ -1,7 +1,19 @@
-**** v. 0.9-5
+**** v. 0.9-6 (2015.03.30)
 
+- Removed the check for the current version of DatABEL on CRAN at the
+  request of Prof. Ripley.
+- Added missing Roxygen documentation for a few variables that R CMD check
+  was complaining about.
+- Converted inst/unitTests/Makefile to Unix format (LF line endings)
+  because R CMD check gave a warning about the CR or CRLF line endings.
+- Fixed bug #2174: "windows 7 64bit gives warning it is a 32 bit system".
+
+**** v. 0.9-5 (2014.01.05)
+
+- Converted documentation to roxygen2 format (Lennart)
+- Fixed bug #5793: impute2DatABEL gives several errors (Maksim)
 - Fixed bug #1126: Using mach2databel() or impute2mach() to convert files
-  to the filevector format leaves fvtmp filles behind (Lennart)
+  to the filevector format leaves fvtmp files behind (Lennart)
 
 **** v. 0.9-4 (2013.03.12)
 

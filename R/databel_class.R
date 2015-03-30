@@ -240,6 +240,7 @@ setMethod(
 
 
 #' @rdname databel-class
+#' @param value Values to be replaced/inserted
 setMethod(
     f = "dimnames<-",
     signature = "databel",
@@ -258,6 +259,7 @@ setMethod(
 
 #' @rdname databel-class
 #' @param j Column index
+#' @param drop Boolean (FALSE by default); UNUSED
 setMethod(
     f = "[",
     signature = "databel",
@@ -284,6 +286,8 @@ setMethod(
 
 
 #' @rdname databel-class
+#' @param x A DatABEL object
+#' @param i Row index
 setMethod(
     f = "[<-",
     signature = "databel",
@@ -470,6 +474,7 @@ setMethod(
 
 #' @aliases backingfilename,databel-method
 #' @rdname databel-class
+#' @param object A DatABEL object
 #' @export
 setGeneric(
     name = "backingfilename",

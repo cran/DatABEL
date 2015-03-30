@@ -602,8 +602,10 @@ extern "C" {
 	}
 
 	SEXP checkNumBits(){
-	    if (sizeof(unsigned long) != 8) {
-    		errorLog << "YOU APPEAR TO WORK ON 32-BIT SYSTEM. LARGE FILES ARE NOT SUPPORTED."<<endl;
+	    if (sizeof(void*) != 8) {
+    		errorLog << 
+		  "YOU APPEAR TO WORK ON A 32-BIT SYSTEM. " << 
+		  "LARGE FILES ARE NOT SUPPORTED." << endl;
     	}
 	    return R_NilValue;
 	}
